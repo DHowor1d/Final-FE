@@ -13,7 +13,7 @@ interface ContextSwitchesSparklineProps {
 
 export default function ContextSwitchesSparkline({ 
   data, 
-  height = '270px' 
+  height = '300px' 
 }: ContextSwitchesSparklineProps) {
   // 시간 포맷팅 함수
   const formatTime = (isoString: string): string => {

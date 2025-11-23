@@ -7,26 +7,81 @@ import {
   NetworkErrorChart,
   CpuUsageDetailChart,
 } from "./index";
-import {
-  mockNetworkTrafficData,
-  mockLoadAverageData,
-  mockDiskIOData,
-  mockContextSwitchesData,
-  mockNetworkErrorData,
-  mockCpuUsageDetailData,
-} from "../data/mockData";
-import type { AggregatedMetrics } from "../types/dashboard.types";
-import { Activity } from "lucide-react";
+import { Activity, Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { useDatacenterSSE } from "../hooks/useDatacenterSSE";
 
 interface DatacenterDashboardProps {
-  metrics: AggregatedMetrics;
+  datacenterId: number;
 }
 
 export default function DatacenterDashboard({
-  metrics,
+  datacenterId,
 }: DatacenterDashboardProps) {
+  const {
+    metrics,
+    cpuUsageHistory,
+    loadAverageHistory,
+    diskIOHistory,
+    networkErrorHistory,
+    contextSwitchesHistory,
+    networkTrafficHistory,
+    isConnected,
+    error,
+    reconnect,
+  } = useDatacenterSSE(datacenterId, true);
+
+  // 로딩 상태
+  if (!metrics) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">실시간 데이터를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* 연결 상태 표시 */}
+      <div className="flex items-center justify-between bg-neutral-800 rounded-lg p-4 border border-neutral-700">
+        <div className="flex items-center gap-3">
+          {isConnected ? (
+            <>
+              <Wifi className="text-green-400" size={20} />
+              <span className="text-green-400 text-sm font-medium">
+                실시간 연결됨
+              </span>
+              <span className="text-gray-500 text-xs">
+                마지막 업데이트: {new Date(metrics.timestamp).toLocaleTimeString('ko-KR')}
+              </span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="text-red-400" size={20} />
+              <span className="text-red-400 text-sm font-medium">
+                연결 끊김
+              </span>
+            </>
+          )}
+        </div>
+        <button
+          onClick={reconnect}
+          className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm text-white transition-colors"
+        >
+          <RefreshCw size={16} />
+          재연결
+        </button>
+      </div>
+
+      {/* 에러 표시 */}
+      {error && (
+        <div className="bg-red-900/20 border border-red-700 rounded-lg p-4">
+          <p className="text-red-400 text-sm">{error}</p>
+        </div>
+      )}
+
       {/* 장비 현황 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-neutral-800 rounded-lg p-4 border border-neutral-700">
@@ -46,7 +101,7 @@ export default function DatacenterDashboard({
             <div>
               <p className="text-gray-400 text-sm">정상</p>
               <p className="text-3xl font-bold text-green-400 mt-1">
-                {metrics.onlineEquipments}
+                {metrics.activeEquipments}
               </p>
             </div>
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -58,7 +113,7 @@ export default function DatacenterDashboard({
             <div>
               <p className="text-gray-400 text-sm">경고</p>
               <p className="text-3xl font-bold text-yellow-400 mt-1">
-                {metrics.warningEquipments}
+                {metrics.warningAlerts}
               </p>
             </div>
             <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
@@ -70,7 +125,7 @@ export default function DatacenterDashboard({
             <div>
               <p className="text-gray-400 text-sm">위험</p>
               <p className="text-3xl font-bold text-red-400 mt-1">
-                {metrics.criticalEquipments}
+                {metrics.criticalAlerts}
               </p>
             </div>
             <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
@@ -82,7 +137,7 @@ export default function DatacenterDashboard({
             <div>
               <p className="text-gray-400 text-sm">오프라인</p>
               <p className="text-3xl font-bold text-gray-400 mt-1">
-                {metrics.offlineEquipments}
+                {metrics.inactiveEquipments}
               </p>
             </div>
             <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
@@ -95,54 +150,34 @@ export default function DatacenterDashboard({
         <CpuGauge value={metrics.avgCpuUsage} />
         <MemoryGauge value={metrics.avgMemoryUsage} />
         <DiskGauge value={metrics.avgDiskUsage} />
-        <NetworkGauge value={15} />
+        <NetworkGauge value={metrics.avgDiskIoUsage} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* CPU 상세 사용률 */}
-        <CpuUsageDetailChart data={mockCpuUsageDetailData} />
+        <CpuUsageDetailChart data={cpuUsageHistory} />
 
         {/* 시스템 부하 추세 */}
-        <LoadAverageChart data={mockLoadAverageData} />
+        <LoadAverageChart data={loadAverageHistory} />
       </div>
 
       {/* 네트워크 및 디스크 I/O */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <NetworkTrafficChart data={mockNetworkTrafficData} />
-        <DiskIOChart data={mockDiskIOData} />
+        <NetworkTrafficChart 
+          data={{
+            currentRxBytesPerSec: metrics.totalInBps,
+            currentTxBytesPerSec: metrics.totalOutBps,
+            networkUsageTrend: networkTrafficHistory,
+          }} 
+        />
+        <DiskIOChart data={diskIOHistory} />
       </div>
 
       {/* Context Switches 및 네트워크 에러/드롭 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ContextSwitchesSparkline data={mockContextSwitchesData} />
-        <NetworkErrorChart data={mockNetworkErrorData} />
+        <ContextSwitchesSparkline data={contextSwitchesHistory} />
+        <NetworkErrorChart data={networkErrorHistory} />
       </div>
-
-      {/* <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity size={20} className="text-yellow-400" />
-            <h3 className="text-lg font-semibold text-gray-100">알람/경고</h3>
-          </div>
-          <div className="space-y-3">
-            {metrics.criticalEquipments > 0 && (
-              <div className="flex items-center justify-between p-3 bg-red-900/20 border border-red-700 rounded">
-                <span className="text-red-400 text-sm">Critical 알람</span>
-                <span className="text-red-400 font-bold">{metrics.criticalEquipments}개</span>
-              </div>
-            )}
-            {metrics.warningEquipments > 0 && (
-              <div className="flex items-center justify-between p-3 bg-yellow-900/20 border border-yellow-700 rounded">
-                <span className="text-yellow-400 text-sm">Warning 알람</span>
-                <span className="text-yellow-400 font-bold">{metrics.warningEquipments}개</span>
-              </div>
-            )}
-            {metrics.criticalEquipments === 0 && metrics.warningEquipments === 0 && (
-              <div className="flex items-center justify-center p-6 text-green-400">
-                <span>활성 알람 없음 ✓</span>
-              </div>
-            )}
-          </div>
-        </div> */}
     </div>
   );
 }
