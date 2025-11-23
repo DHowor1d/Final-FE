@@ -96,6 +96,23 @@ interface BabylonDatacenterStore {
     endGridX: number,
     endGridY: number
   ) => void;
+  
+  // 선택된 빈 영역 (다중 배치용)
+  selectedEmptyArea: {
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+  } | null;
+  setSelectedEmptyArea: (
+    area: { startX: number; startY: number; endX: number; endY: number } | null
+  ) => void;
+  getEmptyGridsInArea: (
+    startGridX: number,
+    startGridY: number,
+    endGridX: number,
+    endGridY: number
+  ) => { gridX: number; gridY: number }[];
 
   // 랙 모달 상태
   isRackModalOpen: boolean;
@@ -123,6 +140,7 @@ interface BabylonDatacenterStore {
   ) => boolean; // boolean 반환 및 타입 변경
   updateEquipmentRotation: (id: string, rotation: number) => void;
   rotateEquipment90: (id: string, clockwise?: boolean) => void; // 90도 회전 함수 추가
+  rotateMultipleEquipments90: (ids: string[], clockwise?: boolean) => void; // 다중 90도 회전 함수
   removeEquipment: (id: string) => void;
   setSelectedEquipment: (id: string | null) => void;
   setSelectedEquipments: (ids: string[]) => void; // 다중 선택 설정
@@ -172,6 +190,7 @@ export const useBabylonDatacenterStore = create<BabylonDatacenterStore>(
     mode: "view",
     currentServerRoomId: null,
     selectionArea: null,
+    selectedEmptyArea: null,
 
     setMode: (nextMode) =>
       set((state) => {
@@ -412,6 +431,31 @@ export const useBabylonDatacenterStore = create<BabylonDatacenterStore>(
       }));
     },
 
+    // 다중 장비 90도 회전
+    rotateMultipleEquipments90: (ids: string[], clockwise: boolean = true) => {
+      set((state) => {
+        const idsSet = new Set(ids);
+        return {
+          equipment: state.equipment.map((eq) => {
+            if (idsSet.has(eq.id)) {
+              // 90도 = π/2 라디안
+              const rotation90 = Math.PI / 2;
+              const newRotation = clockwise
+                ? eq.rotation + rotation90
+                : eq.rotation - rotation90;
+
+              // 0 ~ 2π 범위로 정규화
+              const normalizedRotation =
+                ((newRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+
+              return { ...eq, rotation: normalizedRotation };
+            }
+            return eq;
+          }),
+        };
+      });
+    },
+
     // 장비 제거
     removeEquipment: (id) => {
       set((state) => ({
@@ -455,6 +499,7 @@ export const useBabylonDatacenterStore = create<BabylonDatacenterStore>(
         selectedEquipmentIds: [],
         selectedEquipmentId: null,
         selectionArea: null,
+        selectedEmptyArea: null,
       });
     },
 
@@ -498,6 +543,40 @@ export const useBabylonDatacenterStore = create<BabylonDatacenterStore>(
         selectedEquipmentIds: selectedIds,
         selectedEquipmentId: selectedIds.length === 1 ? selectedIds[0] : null,
       });
+    },
+
+    // 선택된 빈 영역 설정
+    setSelectedEmptyArea: (area) => {
+      set({ selectedEmptyArea: area });
+    },
+
+    // 영역 내의 빈 격자 찾기
+    getEmptyGridsInArea: (startGridX, startGridY, endGridX, endGridY) => {
+      const { equipment, isValidPosition } = get();
+
+      // 시작과 끝 좌표 정규화
+      const minX = Math.min(startGridX, endGridX);
+      const maxX = Math.max(startGridX, endGridX);
+      const minY = Math.min(startGridY, endGridY);
+      const maxY = Math.max(startGridY, endGridY);
+
+      const emptyGrids: { gridX: number; gridY: number }[] = [];
+
+      // 모든 격자를 순회하며 빈 곳 찾기
+      for (let x = minX; x <= maxX; x++) {
+        for (let y = minY; y <= maxY; y++) {
+          // 유효한 위치인지 확인
+          if (!isValidPosition(x, y)) continue;
+
+          // 장비가 없는 위치인지 확인
+          const isOccupied = equipment.some((eq) => eq.gridX === x && eq.gridY === y);
+          if (!isOccupied) {
+            emptyGrids.push({ gridX: x, gridY: y });
+          }
+        }
+      }
+
+      return emptyGrids;
     },
 
     // 위치가 점유되었는지 확인
