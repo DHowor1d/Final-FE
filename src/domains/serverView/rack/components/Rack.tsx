@@ -11,6 +11,14 @@ import {
 } from "../utils/rackCalculation";
 import { rackLayout } from "../utils/rackLayout";
 
+interface SimpleMetrics {
+  cpu: number;
+  memory: number;
+  disk: number;
+}
+
+type AlertStatus = "normal" | "warning" | "critical";
+
 interface RackProps {
   devices: Equipments[];
   floatingDevice: FloatingDevice | null;
@@ -28,6 +36,7 @@ interface RackProps {
   onDeviceClick: (deviceId: number, deviceName: string) => void;
   rackId: number;
   serverRoomId: number;
+  allDeviceMetrics: Map<number, SimpleMetrics>;
 }
 
 const FLOATING_DEVICE_ID = -1;
@@ -47,6 +56,7 @@ function Rack({
   onDeviceNameConfirm,
   onDeviceNameCancel,
   onDeviceClick,
+  allDeviceMetrics,
 }: RackProps) {
   const { width: rackWidth, unitHeight } = RACK_CONFIG;
 
@@ -93,6 +103,37 @@ function Rack({
     }
   };
 
+  const getDeviceAlertStatus = (equipment: Equipments): AlertStatus => {
+    const metrics = allDeviceMetrics.get(equipment.id);
+    if (!metrics) return "normal";
+
+    const cpuThresholdCritical = equipment.cpuThresholdCritical ?? 0;
+    const memoryThresholdCritical = equipment.memoryThresholdCritical ?? 0;
+    const diskThresholdCritical = equipment.diskThresholdCritical ?? 0;
+
+    const cpuThresholdWarning = equipment.cpuThresholdWarning ?? 0;
+    const memoryThresholdWarning = equipment.memoryThresholdWarning ?? 0;
+    const diskThresholdWarning = equipment.diskThresholdWarning ?? 0;
+
+    const isCritical =
+      (cpuThresholdCritical > 0 && metrics.cpu >= cpuThresholdCritical) ||
+      (memoryThresholdCritical > 0 &&
+        metrics.memory >= memoryThresholdCritical) ||
+      (diskThresholdCritical > 0 && metrics.disk >= diskThresholdCritical);
+
+    if (isCritical) return "critical";
+
+    const isWarning =
+      (cpuThresholdWarning > 0 && metrics.cpu >= cpuThresholdWarning) ||
+      (memoryThresholdWarning > 0 &&
+        metrics.memory >= memoryThresholdWarning) ||
+      (diskThresholdWarning > 0 && metrics.disk >= diskThresholdWarning);
+
+    if (isWarning) return "warning";
+
+    return "normal";
+  };
+
   return (
     <div
       className="flex justify-center items-start overflow-y-auto overflow-x-hidden h-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mx-auto"
@@ -106,7 +147,6 @@ function Rack({
         onClick={handleRackClick}
       >
         <Layer>
-          {/* 랙 본체 */}
           <Rect
             x={rackX}
             y={baseY}
@@ -117,7 +157,6 @@ function Rack({
             strokeWidth={1}
           />
 
-          {/* U 단위 구분선 및 번호 */}
           {Array.from({ length: UNIT_COUNT + 1 }).map((_, i) => {
             const unitNumber = UNIT_COUNT - i;
             const yPos = baseY + i * unitHeight;
@@ -142,7 +181,6 @@ function Rack({
             );
           })}
 
-          {/* 설치된 장비들 */}
           {devices.map((device) => {
             const y = calculateDeviceY(
               device.startUnit,
@@ -152,6 +190,8 @@ function Rack({
               unitHeight
             );
             const height = unitHeight * device.unitSize;
+            const alertStatus = getDeviceAlertStatus(device);
+            const deviceMetrics = allDeviceMetrics.get(device.id);
 
             return (
               <Device
@@ -171,11 +211,20 @@ function Rack({
                 onDeviceNameChange={onDeviceNameChange}
                 onDeviceNameConfirm={onDeviceNameConfirm}
                 onDeviceNameCancel={onDeviceNameCancel}
+                alertStatus={alertStatus}
+                currentSystemData={
+                  deviceMetrics
+                    ? {
+                        cpu: deviceMetrics.cpu,
+                        memory: deviceMetrics.memory,
+                        disk: deviceMetrics.disk,
+                      }
+                    : null
+                }
               />
             );
           })}
 
-          {/* 떠있는 장비 */}
           {floatingDevice && floatingInfo && (
             <Device
               device={{

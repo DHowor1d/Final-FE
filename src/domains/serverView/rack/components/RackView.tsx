@@ -5,12 +5,40 @@ import RackHeader from "./RackHeader";
 import Button from "./Button";
 import { useState, useEffect, useMemo } from "react";
 import ServerDashboard from "@domains/serverView/serverDashboard/components/ServerDashboard";
+import type {
+  SystemMonitoringData,
+  DiskMonitoringData,
+} from "../../serverDashboard/types";
+import { useMonitoringStore } from "../../serverDashboard/stores/monitoringStore";
 
 interface RackViewProps {
   onClose?: () => void;
   rackName?: string;
   serverRoomId: number;
 }
+
+interface SimpleMetrics {
+  cpu: number;
+  memory: number;
+  disk: number;
+}
+
+const extractMetricsFromSystemData = (
+  systemData: SystemMonitoringData | null,
+  diskData: DiskMonitoringData | null
+): SimpleMetrics | null => {
+  if (!systemData) return null;
+
+  const cpu = Math.max(0, 100 - systemData.cpuIdle);
+  const memory = systemData.usedMemoryPercentage || 0;
+  const disk = diskData?.usedPercentage || 0;
+
+  return {
+    cpu: Number(cpu.toFixed(1)),
+    memory: Number(memory.toFixed(1)),
+    disk: Number(disk.toFixed(1)),
+  };
+};
 
 function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
   const [frontView, setFrontView] = useState(true);
@@ -21,6 +49,12 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     id: number;
     name: string;
   } | null>(null);
+
+  const [allDeviceMetrics, setAllDeviceMetrics] = useState<
+    Map<number, SimpleMetrics>
+  >(new Map());
+
+  const { systemData, diskData } = useMonitoringStore();
 
   const rackId = useMemo(() => {
     if (!rackName) return undefined;
@@ -39,6 +73,19 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     () => rackManager.equipments?.find((eq) => eq.id === selectedDevice?.id),
     [rackManager.equipments, selectedDevice?.id]
   );
+
+  useEffect(() => {
+    if (systemData && selectedDevice) {
+      const metrics = extractMetricsFromSystemData(systemData, diskData);
+      if (metrics) {
+        setAllDeviceMetrics((prevMap) => {
+          const newMap = new Map(prevMap);
+          newMap.set(selectedDevice.id, metrics);
+          return newMap;
+        });
+      }
+    }
+  }, [systemData, diskData, selectedDevice]);
 
   useEffect(() => {
     if (editMode) {
@@ -151,6 +198,7 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
                   onDeviceNameCancel={rackManager.handleDeviceNameCancel}
                   rackId={rackId || 0}
                   serverRoomId={serverRoomId}
+                  allDeviceMetrics={allDeviceMetrics}
                 />
               </div>
             </div>
