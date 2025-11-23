@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 interface SeriesData {
   name: string;
-  data: number[];
+  data: number[] | null;
   color?: string;
   showAverage?: boolean;
   showMaxMin?: boolean;

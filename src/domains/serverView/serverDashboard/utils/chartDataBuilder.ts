@@ -1,0 +1,292 @@
+import {
+  generateTimeLabels,
+  bytesToMbps,
+  aggregateNetworkByTime,
+} from "../utils/monitoring";
+import { CHART_CONFIG } from "../constants";
+
+interface ChartSeries {
+  name: string;
+  data: number[];
+  color: string;
+  showAverage?: boolean;
+  averageLineStyle?: string;
+  averageColor?: string;
+}
+
+interface SystemData {
+  cpuIdle: number;
+  usedMemoryPercentage: number;
+  [key: string]: any;
+}
+
+interface DiskData {
+  usedPercentage: number;
+  [key: string]: any;
+}
+
+interface ChartDataState {
+  systemData: SystemData | null;
+  diskData: DiskData | null;
+  systemHistory: any[];
+  diskHistory: any[];
+  networkHistory: any[];
+}
+
+interface ChartDataResult {
+  timeLabels: string[];
+  networkTimeLabels: string[];
+  cpuUsage: number;
+  memoryUsage: number;
+  diskUsage: number;
+  cpuModes: ChartSeries[];
+  loadAverage: ChartSeries[];
+  memorySwap: ChartSeries[];
+  networkBandwidth: ChartSeries[];
+  cpuOverhead: ChartSeries[];
+  diskIO: ChartSeries[];
+  inodeUsage: ChartSeries[];
+}
+
+const { MAX_POINTS, COLORS } = CHART_CONFIG;
+
+// 데이터 배열을 MAX_POINTS 크기로 채우기
+const fillData = (
+  data: number[],
+  targetLength: number = MAX_POINTS
+): number[] => {
+  const filled = [...data];
+  const emptyCount = targetLength - data.length;
+  for (let i = 0; i < emptyCount; i++) {
+    filled.push(0);
+  }
+  return filled;
+};
+
+// 시간 레이블 채우기
+const fillTimeLabels = (labels: string[]): string[] => {
+  const filled = [...labels];
+  const emptyCount = MAX_POINTS - labels.length;
+  for (let i = 0; i < emptyCount; i++) {
+    filled.push("");
+  }
+  return filled;
+};
+
+// 공통 series 생성 헬퍼
+interface CreateSeriesOptions {
+  name: string;
+  data: number[];
+  color: string;
+  showAverage?: boolean;
+  averageLineStyle?: string;
+  averageColor?: string;
+}
+
+const createSeries = ({
+  name,
+  data,
+  color,
+  showAverage,
+  averageLineStyle,
+  averageColor,
+}: CreateSeriesOptions): ChartSeries => ({
+  name,
+  data: fillData(data),
+  color,
+  ...(showAverage && {
+    showAverage,
+    averageLineStyle: averageLineStyle || "solid",
+    averageColor: averageColor || color,
+  }),
+});
+
+// CPU 모드 series 생성
+const buildCpuModes = (history: any[]): ChartSeries[] => [
+  createSeries({
+    name: "User",
+    data: history.map((d) => d.cpuUser),
+    color: COLORS.cpuUser,
+  }),
+  createSeries({
+    name: "System",
+    data: history.map((d) => d.cpuSystem),
+    color: COLORS.cpuSystem,
+  }),
+  createSeries({
+    name: "I/O Wait",
+    data: history.map((d) => d.cpuWait),
+    color: COLORS.ioWait,
+  }),
+  createSeries({
+    name: "IRQ",
+    data: history.map((d) => d.cpuIrq),
+    color: COLORS.irq,
+  }),
+  createSeries({
+    name: "Softirq",
+    data: history.map((d) => d.cpuSoftirq),
+    color: COLORS.softirq,
+  }),
+];
+
+// Load Average series 생성
+const buildLoadAverage = (history: any[]): ChartSeries[] => [
+  createSeries({
+    name: "1분 평균",
+    data: history.map((d) => d.loadAvg1),
+    color: COLORS.cpuUser,
+  }),
+  createSeries({
+    name: "5분 평균",
+    data: history.map((d) => d.loadAvg5),
+    color: COLORS.irq,
+  }),
+  createSeries({
+    name: "15분 평균",
+    data: history.map((d) => d.loadAvg15),
+    color: COLORS.ioWait,
+  }),
+];
+
+// Memory & Swap series 생성
+const buildMemorySwap = (history: any[]): ChartSeries[] => [
+  createSeries({
+    name: "메모리",
+    data: history.map((d) => d.usedMemoryPercentage),
+    color: COLORS.irq,
+    showAverage: true,
+  }),
+  createSeries({
+    name: "스왑",
+    data: history.map((d) => d.usedSwapPercentage),
+    color: COLORS.swap,
+    showAverage: true,
+  }),
+];
+
+// Network Bandwidth series 생성
+const buildNetworkBandwidth = (aggregated: any): ChartSeries[] => [
+  createSeries({
+    name: "수신 (RX)",
+    data: aggregated.rx.map((bytes: number) => bytesToMbps(bytes)),
+    color: COLORS.rx,
+  }),
+  createSeries({
+    name: "송신 (TX)",
+    data: aggregated.tx.map((bytes: number) => bytesToMbps(bytes)),
+    color: COLORS.tx,
+  }),
+];
+
+// CPU Overhead series 생성
+const buildCpuOverhead = (history: any[]): ChartSeries[] => [
+  createSeries({
+    name: "I/O Wait (%)",
+    data: history.map((d) => d.cpuWait),
+    color: COLORS.ioWait,
+    showAverage: true,
+    averageLineStyle: "dashed",
+    averageColor: COLORS.ioWait,
+  }),
+  createSeries({
+    name: "Steal (%)",
+    data: history.map((d) => d.cpuSteal),
+    color: COLORS.steal,
+    showAverage: true,
+    averageLineStyle: "dashed",
+    averageColor: COLORS.steal,
+  }),
+];
+
+// Disk I/O series 생성
+const buildDiskIO = (history: any[]): ChartSeries[] => [
+  createSeries({
+    name: "읽기",
+    data: history.map((d) => bytesToMbps(d.ioReadBps)),
+    color: COLORS.diskRead,
+  }),
+  createSeries({
+    name: "쓰기",
+    data: history.map((d) => bytesToMbps(d.ioWriteBps)),
+    color: COLORS.diskWrite,
+  }),
+];
+
+// Inode Usage series 생성
+const buildInodeUsage = (history: any[]): ChartSeries[] => [
+  createSeries({
+    name: "Disk 사용률",
+    data: history.map((d) => d.usedPercentage),
+    color: COLORS.ioWait,
+    showAverage: true,
+    averageLineStyle: "dashed",
+    averageColor: COLORS.ioWait,
+  }),
+  createSeries({
+    name: "Inode 사용률",
+    data: history.map((d) => d.usedInodePercentage),
+    color: COLORS.irq,
+    showAverage: true,
+    averageLineStyle: "dashed",
+    averageColor: COLORS.irq,
+  }),
+];
+
+// 메인: 차트 데이터 빌드
+export const buildChartData = ({
+  systemData,
+  diskData,
+  systemHistory,
+  diskHistory,
+  networkHistory,
+}: ChartDataState): ChartDataResult => {
+  if (systemHistory.length === 0) {
+    return {
+      timeLabels: [],
+      networkTimeLabels: [],
+      cpuUsage: 0,
+      memoryUsage: 0,
+      diskUsage: 0,
+      cpuModes: [],
+      loadAverage: [],
+      memorySwap: [],
+      networkBandwidth: [],
+      cpuOverhead: [],
+      diskIO: [],
+      inodeUsage: [],
+    };
+  }
+
+  // 최근 MAX_POINTS개 데이터만 사용
+  const recentSystemHistory = systemHistory.slice(-MAX_POINTS);
+  const recentDiskHistory = diskHistory.slice(-MAX_POINTS);
+
+  // 시간 레이블 생성
+  const timeLabels = fillTimeLabels(
+    generateTimeLabels(recentSystemHistory, MAX_POINTS)
+  );
+
+  // 네트워크 데이터 집계
+  const flatNetworkHistory = networkHistory.flat();
+  const aggregatedNetwork = aggregateNetworkByTime(
+    flatNetworkHistory,
+    MAX_POINTS
+  );
+  const networkTimeLabels = fillTimeLabels(aggregatedNetwork.timeLabels);
+
+  return {
+    timeLabels,
+    networkTimeLabels,
+    cpuUsage: systemData ? Math.round(100 - systemData.cpuIdle) : 0,
+    memoryUsage: systemData ? Math.round(systemData.usedMemoryPercentage) : 0,
+    diskUsage: diskData ? Math.round(diskData.usedPercentage) : 0,
+    cpuModes: buildCpuModes(recentSystemHistory),
+    loadAverage: buildLoadAverage(recentSystemHistory),
+    memorySwap: buildMemorySwap(recentSystemHistory),
+    networkBandwidth: buildNetworkBandwidth(aggregatedNetwork),
+    cpuOverhead: buildCpuOverhead(recentSystemHistory),
+    diskIO: buildDiskIO(recentDiskHistory),
+    inodeUsage: buildInodeUsage(recentDiskHistory),
+  };
+};

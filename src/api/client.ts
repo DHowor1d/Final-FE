@@ -1,8 +1,7 @@
 import axios from "axios";
 
 // const BASE_URL = "http://localhost:8080/api";
-const BASE_URL = "https://api.serverway.shop/api";
-
+export const BASE_URL = "https://api.serverway.shop/api";
 
 // 메모리에 토큰 저장
 let accessTokenInMemory: string | null = null;
@@ -17,7 +16,7 @@ const client = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
-    "Accept": "application/json",
+    Accept: "application/json",
   },
   withCredentials: true, // HttpOnly 쿠키 전송 (Refresh Token)
 });
@@ -49,10 +48,10 @@ client.interceptors.response.use(
           {},
           { withCredentials: true }
         );
-        
+
         const newToken = response.data.accessToken;
         setAccessToken(newToken); // 메모리에 저장
-        
+
         originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
         return client(originalRequest);
       } catch (error) {
