@@ -160,3 +160,219 @@ export interface NetworkTrafficData {
   currentTxBytesPerSec: number;
   networkUsageTrend: NetworkUsageTrend[];
 }
+
+// ==================== SSE 실시간 데이터 타입 ====================
+
+// 서버실 요약 정보
+export interface ServerRoomSummary {
+  serverRoomId: number;
+  serverRoomName: string;
+  equipmentCount: number;
+  avgCpuUsage: number | null;
+  avgMemoryUsage: number | null;
+  avgDiskUsage: number | null;
+  avgTemperature: number | null;
+  alertCount: number;
+}
+
+// 데이터센터 실시간 메트릭 (SSE)
+export interface DatacenterMetrics {
+  dataCenterId: number;
+  dataCenterName: string;
+  timestamp: string;
+  
+  // 서버실 및 랙 현황
+  totalServerRooms: number;
+  activeServerRooms: number;
+  totalRacks: number;
+  activeRacks: number;
+  
+  // 장비 현황
+  totalEquipments: number;
+  activeEquipments: number;
+  inactiveEquipments: number;
+  
+  // CPU 메트릭
+  avgCpuUsage: number;
+  maxCpuUsage: number;
+  minCpuUsage: number;
+  avgLoadAvg1: number;
+  
+  // 메모리 메트릭
+  avgMemoryUsage: number;
+  maxMemoryUsage: number;
+  minMemoryUsage: number;
+  totalMemoryBytes: number;
+  usedMemoryBytes: number;
+  avgSwapUsage: number;
+  
+  // 디스크 메트릭
+  avgDiskUsage: number;
+  maxDiskUsage: number;
+  minDiskUsage: number;
+  totalDiskBytes: number;
+  usedDiskBytes: number;
+  avgDiskIoUsage: number;
+  
+  // 네트워크 메트릭
+  totalInBps: number;
+  totalOutBps: number;
+  avgRxUsage: number;
+  avgTxUsage: number;
+  totalInErrors: number;
+  totalOutErrors: number;
+  
+  // 온습도 메트릭
+  avgTemperature: number;
+  maxTemperature: number;
+  minTemperature: number;
+  avgHumidity: number;
+  maxHumidity: number;
+  minHumidity: number;
+  temperatureWarnings: number;
+  humidityWarnings: number;
+  
+  // 알림 및 전력
+  totalAlerts: number;
+  criticalAlerts: number;
+  warningAlerts: number;
+  totalPowerUsage: number;
+  avgPowerUsagePerRack: number;
+  
+  // 서버실 요약 (추후 사용)
+  serverRoomSummaries: ServerRoomSummary[];
+}
+
+// 시계열 데이터 포인트
+export interface TimeSeriesDataPoint {
+  timestamp: string;
+  value: number;
+}
+
+// CPU 사용률 상세 (시계열) - 차트 컴포넌트와 호환
+export interface CpuUsageDetail {
+  time: string;
+  cpuUser: number;
+  cpuSystem: number;
+  cpuWait: number;
+  cpuNice: number;
+  cpuIrq: number;
+  cpuSoftirq: number;
+  cpuSteal: number;
+  cpuIdle: number;
+}
+
+// Load Average 시계열 - 차트 컴포넌트와 호환
+export interface LoadAverageData {
+  time: string;
+  loadAvg1: number;
+  loadAvg5: number;
+  loadAvg15: number;
+}
+
+// 디스크 I/O 시계열 - 차트 컴포넌트와 호환
+export interface DiskIOData {
+  time: string;
+  ioReadBps: number;
+  ioWriteBps: number;
+  ioTimePercentage: number;
+}
+
+// 디스크 사용량 시계열 - 차트 컴포넌트와 호환
+export interface DiskUsageData {
+  time: string;
+  avgUsage: number;
+  maxUsage: number;
+  minUsage: number;
+}
+
+// CPU 사용량 시계열 - 차트 컴포넌트와 호환
+export interface CpuUsageData {
+  time: string;
+  avgUsage: number;
+  maxUsage: number;
+  minUsage: number;
+}
+
+// 네트워크 에러 시계열 - 차트 컴포넌트와 호환
+export interface NetworkErrorData {
+  time: string;
+  inErrors: number;
+  outErrors: number;
+}
+
+// Context Switches 시계열 - 차트 컴포넌트와 호환
+export interface ContextSwitchesData {
+  time: string;
+  contextSwitches: number;
+}
+
+// 온습도 시계열 데이터
+export interface TemperatureHumidityData {
+  time: string;
+  temperature: number;
+  humidity: number;
+}
+
+// 서버룸 실시간 메트릭 (SSE)
+export interface ServerRoomMetrics {
+  serverRoomId: number;
+  serverRoomName: string;
+  timestamp: string;
+  
+  // 랙 현황
+  totalRacks: number;
+  activeRacks: number;
+  
+  // 장비 현황
+  totalEquipments: number;
+  activeEquipments: number;
+  inactiveEquipments: number;
+  
+  // CPU 메트릭
+  avgCpuUsage: number;
+  maxCpuUsage: number;
+  minCpuUsage: number;
+  avgLoadAvg1: number;
+  
+  // 메모리 메트릭
+  avgMemoryUsage: number;
+  maxMemoryUsage: number;
+  minMemoryUsage: number;
+  totalMemoryBytes: number;
+  usedMemoryBytes: number;
+  avgSwapUsage: number;
+  
+  // 디스크 메트릭
+  avgDiskUsage: number;
+  maxDiskUsage: number;
+  minDiskUsage: number;
+  totalDiskBytes: number;
+  usedDiskBytes: number;
+  avgDiskIoUsage: number;
+  
+  // 네트워크 메트릭
+  totalInBps: number;
+  totalOutBps: number;
+  avgRxUsage: number;
+  avgTxUsage: number;
+  totalInErrors: number;
+  totalOutErrors: number;
+  
+  // 온습도 메트릭
+  avgTemperature: number;
+  maxTemperature: number;
+  minTemperature: number;
+  avgHumidity: number;
+  maxHumidity: number;
+  minHumidity: number;
+  temperatureWarnings: number;
+  humidityWarnings: number;
+  
+  // 알림 및 전력
+  totalAlerts: number;
+  criticalAlerts: number;
+  warningAlerts: number;
+  totalPowerUsage: number;
+  avgPowerUsagePerRack: number;
+}

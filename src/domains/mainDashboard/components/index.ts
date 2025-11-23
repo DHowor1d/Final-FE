@@ -10,9 +10,12 @@ export { default as LineChart } from './LineChart';
 export { default as NetworkTrafficChart } from './NetworkTrafficChart';
 export { default as LoadAverageChart } from './LoadAverageChart';
 export { default as DiskIOChart } from './DiskIOChart';
+export { default as DiskUsageChart } from './DiskUsageChart';
+export { default as CpuUsageChart } from './CpuUsageChart';
 export { default as ContextSwitchesSparkline } from './ContextSwitchesSparkline';
 export { default as NetworkErrorChart } from './NetworkErrorChart';
 export { default as CpuUsageDetailChart } from './CpuUsageDetailChart';
+export { default as TemperatureHumidityChart } from './TemperatureHumidityChart';
 
 //다른 컴포넌트
 export { default as ProgressGauge } from './ProgressGauge';

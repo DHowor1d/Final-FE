@@ -7,7 +7,7 @@ interface NetworkTrafficChartProps {
   height?: string;
 }
 
-export default function NetworkTrafficChart({ data, height = '250px' }: NetworkTrafficChartProps) {
+export default function NetworkTrafficChart({ data, height = '300px' }: NetworkTrafficChartProps) {
   // 바이트를 Mbps로 변환하는 함수
   const bytesToMbps = (bytes: number): string => {
     return ((bytes * 8) / (1024 * 1024)).toFixed(2);

@@ -206,26 +206,24 @@ const FloorPlanPage: React.FC<FloorPlanPageProps> = ({ containerRef, serverRoomI
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="flex-1 relative overflow-hidden">
-        <Canvas containerRef={containerRef} serverRoomId={serverRoomId} />
-        {/* TopNWidget: 보기 모드에서만 표시 */}
-        {mode === 'view' && dashboardMetricView !== 'default' && <TopNWidget />}
+      <Canvas containerRef={containerRef} serverRoomId={serverRoomId} />
+      {/* TopNWidget: 보기 모드에서만 표시 */}
+      {mode === 'view' && dashboardMetricView !== 'default' && <TopNWidget />}
 
-        {/* 편집 모드에서 3D 장비 팔레트 표시 */}
-        {mode === 'edit' && <EquipmentPalette3D onAddEquipment={handleAddEquipment} />}
-        
-        {/* 확대경 위젯: 보기 모드에서 활성화 시 표시 */}
-        {mode === 'view' && isMagnifierEnabled && containerRef.current && (
-          <MagnifierWidget
-            mousePosition={mousePosition}
-            containerWidth={containerRef.current.clientWidth}
-            containerHeight={containerRef.current.clientHeight}
-          />
-        )}
-        
-        <RackModal />
-        <FloorPlanConfirmationModal />
-      </div>
+      {/* 편집 모드에서 3D 장비 팔레트 표시 */}
+      {mode === 'edit' && <EquipmentPalette3D onAddEquipment={handleAddEquipment} />}
+      
+      {/* 확대경 위젯: 보기 모드에서 활성화 시 표시 */}
+      {mode === 'view' && isMagnifierEnabled && containerRef.current && (
+        <MagnifierWidget
+          mousePosition={mousePosition}
+          containerWidth={containerRef.current.clientWidth}
+          containerHeight={containerRef.current.clientHeight}
+        />
+      )}
+      
+      <RackModal />
+      <FloorPlanConfirmationModal />
     </DndContext>
   );
 };

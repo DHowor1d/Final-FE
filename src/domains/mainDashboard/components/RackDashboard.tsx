@@ -11,21 +11,20 @@ import type { Rack } from "../types/dashboard.types";
 import { equipmentColumns } from "./equipmentTable.config";
 import { Layers, AlertTriangle } from "lucide-react";
 import { CpuGauge, MemoryGauge, DiskGauge, NetworkGauge } from "./index";
-import { 
-  NetworkTrafficChart, 
-  LoadAverageChart, 
+import {
+  NetworkTrafficChart,
+  LoadAverageChart,
   DiskIOChart,
   ContextSwitchesSparkline,
   NetworkErrorChart,
-  CpuUsageDetailChart
+  CpuUsageDetailChart,
 } from "./index";
-import { 
-  mockNetworkTrafficData, 
-  mockLoadAverageData, 
+import {
+  mockNetworkTrafficData,
+  mockLoadAverageData,
   mockDiskIOData,
   mockContextSwitchesData,
-  mockNetworkErrorData,
-  mockCpuUsageDetailData
+  mockCpuUsageDetailData,
 } from "../data/mockData";
 
 interface RackDashboardProps {
@@ -148,14 +147,23 @@ export default function RackDashboard({ rack }: RackDashboardProps) {
         <CpuGauge value={avgCpuUsage} />
         <MemoryGauge value={avgMemoryUsage} />
         <DiskGauge value={avgDiskUsage} />
-        <NetworkGauge value={rack.equipments[0]?.networkMetrics?.[0] ? ((rack.equipments[0].networkMetrics[0].rx_usage + rack.equipments[0].networkMetrics[0].tx_usage) / 2) : 0} />
+        <NetworkGauge
+          value={
+            rack.equipments[0]?.networkMetrics?.[0]
+              ? (rack.equipments[0].networkMetrics[0].rx_usage +
+                  rack.equipments[0].networkMetrics[0].tx_usage) /
+                2
+              : 0
+          }
+        />
       </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* CPU 상세 사용률 */}
+        <CpuUsageDetailChart data={mockCpuUsageDetailData} />
 
-      {/* CPU 상세 사용률 */}
-      <CpuUsageDetailChart data={mockCpuUsageDetailData} />
-
-      {/* 시스템 부하 추세 */}
-      <LoadAverageChart data={mockLoadAverageData} />
+        {/* 시스템 부하 추세 */}
+        <LoadAverageChart data={mockLoadAverageData} />
+      </div>
 
       {/* 네트워크 및 디스크 I/O */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -164,11 +172,12 @@ export default function RackDashboard({ rack }: RackDashboardProps) {
       </div>
 
       {/* Context Switches 및 네트워크 에러/드롭 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ContextSwitchesSparkline data={mockContextSwitchesData} />
-        <NetworkErrorChart data={mockNetworkErrorData} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <ContextSwitchesSparkline data={mockContextSwitchesData} />
+        </div>
+        <NetworkErrorChart data={[]} />
       </div>
-
 
       {/* 알람 */}
       {(warningCount > 0 || criticalCount > 0) && (
