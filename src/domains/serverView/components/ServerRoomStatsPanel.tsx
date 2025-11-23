@@ -23,37 +23,39 @@ export default function ServerRoomStatsPanel({ serverRoomId }: ServerRoomStatsPa
     {
       icon: Cpu,
       label: 'CPU',
-      value: `${metrics.avgCpuUsage.toFixed(1)}%`,
+      value: `${metrics.avgCpuUsage?.toFixed(1) ?? 'N/A'}%`,
       color: 'text-blue-400',
     },
     {
       icon: MemoryStick,
       label: '메모리',
-      value: `${metrics.avgMemoryUsage.toFixed(1)}%`,
+      value: `${metrics.avgMemoryUsage?.toFixed(1) ?? 'N/A'}%`,
       color: 'text-purple-400',
     },
     {
       icon: HardDrive,
       label: '디스크',
-      value: `${metrics.avgDiskUsage.toFixed(1)}%`,
+      value: `${metrics.avgDiskUsage?.toFixed(1) ?? 'N/A'}%`,
       color: 'text-yellow-400',
     },
     {
       icon: Network,
       label: '네트워크',
-      value: `${((metrics.avgRxUsage + metrics.avgTxUsage) / 2).toFixed(1)}%`,
+      value: metrics.avgRxUsage != null && metrics.avgTxUsage != null 
+        ? `${((metrics.avgRxUsage + metrics.avgTxUsage) / 2).toFixed(1)}%`
+        : 'N/A%',
       color: 'text-cyan-400',
     },
     {
       icon: Thermometer,
       label: '온도',
-      value: `${metrics.avgTemperature.toFixed(1)}°C`,
+      value: `${metrics.avgTemperature?.toFixed(1) ?? 'N/A'}°C`,
       color: 'text-orange-400',
     },
     {
       icon: Droplets,
       label: '습도',
-      value: `${metrics.avgHumidity.toFixed(1)}%`,
+      value: `${metrics.avgHumidity?.toFixed(1) ?? 'N/A'}%`,
       color: 'text-sky-400',
     },
   ];
@@ -62,13 +64,13 @@ export default function ServerRoomStatsPanel({ serverRoomId }: ServerRoomStatsPa
     {
       icon: Server,
       label: '장비',
-      value: `${metrics.activeEquipments}/${metrics.totalEquipments}`,
+      value: `${metrics.activeEquipments ?? 0}/${metrics.totalEquipments ?? 0}`,
       color: 'text-green-400',
     },
     {
       icon: Box,
       label: '랙',
-      value: `${metrics.activeRacks}/${metrics.totalRacks}`,
+      value: `${metrics.activeRacks ?? 0}/${metrics.totalRacks ?? 0}`,
       color: 'text-indigo-400',
     },
   ];
@@ -125,7 +127,7 @@ export default function ServerRoomStatsPanel({ serverRoomId }: ServerRoomStatsPa
       </div>
 
       {/* 알림 */}
-      {metrics.totalAlerts > 0 && (
+      {(metrics.totalAlerts ?? 0) > 0 && (
         <>
           <div className="border-t border-neutral-700"></div>
           <div className="p-3">
@@ -133,10 +135,10 @@ export default function ServerRoomStatsPanel({ serverRoomId }: ServerRoomStatsPa
               <span className="text-xs text-red-400">알림</span>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-red-400">
-                  위험 <span className="font-semibold">{metrics.criticalAlerts}</span>
+                  위험 <span className="font-semibold">{metrics.criticalAlerts ?? 0}</span>
                 </span>
                 <span className="text-xs text-yellow-400">
-                  경고 <span className="font-semibold">{metrics.warningAlerts}</span>
+                  경고 <span className="font-semibold">{metrics.warningAlerts ?? 0}</span>
                 </span>
               </div>
             </div>
