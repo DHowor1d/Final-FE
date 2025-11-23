@@ -5,7 +5,6 @@ import DatacenterDashboard from '../components/DatacenterDashboard';
 import ServerRoomDashboard from '../components/ServerRoomDashboard';
 import RackDashboard from '../components/RackDashboard';
 import { useDashboardData } from '../hooks/useDashboardData';
-import { calculateAggregatedMetrics, calculateServerRoomMetrics } from '../utils/metricsCalculator';
 import type { SelectedNode } from '../types/dashboard.types';
 
 function MainDashboard() {
@@ -50,16 +49,11 @@ function MainDashboard() {
     if (!datacenter) return <div className="text-gray-400">데이터센터를 찾을 수 없습니다.</div>;
 
     if (selectedNode.level === 'datacenter') {
-      const metrics = calculateAggregatedMetrics(datacenter);
-      return <DatacenterDashboard metrics={metrics} />;
+      return <DatacenterDashboard datacenterId={datacenter.id} />;
     }
 
     if (selectedNode.level === 'serverRoom' && selectedNode.serverRoomId) {
-      const serverRoom = datacenter.serverRooms.find((sr) => sr.id === selectedNode.serverRoomId);
-      if (!serverRoom) return <div className="text-gray-400">서버실을 찾을 수 없습니다.</div>;
-
-      const metrics = calculateServerRoomMetrics(datacenter, serverRoom.id);
-      return <ServerRoomDashboard serverRoom={serverRoom} metrics={metrics} />;
+      return <ServerRoomDashboard serverRoomId={selectedNode.serverRoomId} />;
     }
 
     if (selectedNode.level === 'rack' && selectedNode.serverRoomId && selectedNode.rackId) {

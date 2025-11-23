@@ -113,6 +113,7 @@ export default function LineChart({
     xAxis: {
       type: 'category',
       data: xAxisData,
+      boundaryGap: false,
       axisLabel: {
         color: '#9ca3af',
         rotate: 45,
