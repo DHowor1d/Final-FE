@@ -2,8 +2,8 @@ import { getAccessToken } from "./client";
 
 const BASE_URL = "https://api.serverway.shop/api";
 
-export interface SSEOptions {
-  onMessage: (data: any) => void;
+export interface SSEOptions<T = unknown> {
+  onMessage: (data: T) => void;
   onError?: (error: Event) => void;
   onOpen?: () => void;
   reconnectDelay?: number;
@@ -20,9 +20,9 @@ export interface SSEConnection {
  * SSE 연결을 생성하고 관리하는 유틸리티 함수
  * EventSource는 헤더를 지원하지 않으므로 fetch로 스트림을 처리
  */
-export const createSSEConnection = (
+export const createSSEConnection = <T = unknown>(
   endpoint: string,
-  options: SSEOptions
+  options: SSEOptions<T>
 ): SSEConnection => {
   let abortController: AbortController | null = null;
   let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -113,8 +113,8 @@ export const createSSEConnection = (
       if (!isManualClose) {
         attemptReconnect();
       }
-    } catch (error: any) {
-      if (error.name === "AbortError") {
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
         console.log("SSE connection aborted");
         return;
       }
@@ -187,9 +187,9 @@ export const createSSEConnection = (
 /**
  * 데이터센터 모니터링 SSE 연결 생성
  */
-export const createDatacenterSSE = (
+export const createDatacenterSSE = <T = unknown>(
   datacenterId: number,
-  options: Omit<SSEOptions, "onOpen"> & { onOpen?: () => void }
+  options: Omit<SSEOptions<T>, "onOpen"> & { onOpen?: () => void }
 ) => {
   return createSSEConnection(
     `/monitoring/subscribe/datacenter/${datacenterId}`,
@@ -200,9 +200,9 @@ export const createDatacenterSSE = (
 /**
  * 서버실 모니터링 SSE 연결 생성 (추후 사용)
  */
-export const createServerRoomSSE = (
+export const createServerRoomSSE = <T = unknown>(
   serverRoomId: number,
-  options: Omit<SSEOptions, "onOpen"> & { onOpen?: () => void }
+  options: Omit<SSEOptions<T>, "onOpen"> & { onOpen?: () => void }
 ) => {
   return createSSEConnection(
     `/monitoring/subscribe/serverroom/${serverRoomId}`,
@@ -213,9 +213,9 @@ export const createServerRoomSSE = (
 /**
  * 랙 모니터링 SSE 연결 생성 (추후 사용)
  */
-export const createRackSSE = (
+export const createRackSSE = <T = unknown>(
   rackId: number,
-  options: Omit<SSEOptions, "onOpen"> & { onOpen?: () => void }
+  options: Omit<SSEOptions<T>, "onOpen"> & { onOpen?: () => void }
 ) => {
   return createSSEConnection(`/monitoring/subscribe/rack/${rackId}`, options);
 };
