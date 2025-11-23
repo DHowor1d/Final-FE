@@ -269,7 +269,7 @@ function ServerViewHeader({
             )}
             {/* 편집 모드 컨트롤 */}
             {mode === "edit" && (
-              <div className="flex items-center gap-2 border border-gray-600 rounded-lg p-1 bg-gray-700/50">
+              <div className="flex items-center gap-2 border border-gray-600 rounded-lg bg-gray-700/50">
                 <button
                   onClick={() => undo()}
                   className="p-2 rounded-md flex items-center gap-1.5 text-gray-100 hover:bg-gray-600 transition-colors"

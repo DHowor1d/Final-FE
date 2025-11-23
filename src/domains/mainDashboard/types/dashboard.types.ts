@@ -278,6 +278,22 @@ export interface DiskIOData {
   ioTimePercentage: number;
 }
 
+// 디스크 사용량 시계열 - 차트 컴포넌트와 호환
+export interface DiskUsageData {
+  time: string;
+  avgUsage: number;
+  maxUsage: number;
+  minUsage: number;
+}
+
+// CPU 사용량 시계열 - 차트 컴포넌트와 호환
+export interface CpuUsageData {
+  time: string;
+  avgUsage: number;
+  maxUsage: number;
+  minUsage: number;
+}
+
 // 네트워크 에러 시계열 - 차트 컴포넌트와 호환
 export interface NetworkErrorData {
   time: string;
@@ -289,4 +305,74 @@ export interface NetworkErrorData {
 export interface ContextSwitchesData {
   time: string;
   contextSwitches: number;
+}
+
+// 온습도 시계열 데이터
+export interface TemperatureHumidityData {
+  time: string;
+  temperature: number;
+  humidity: number;
+}
+
+// 서버룸 실시간 메트릭 (SSE)
+export interface ServerRoomMetrics {
+  serverRoomId: number;
+  serverRoomName: string;
+  timestamp: string;
+  
+  // 랙 현황
+  totalRacks: number;
+  activeRacks: number;
+  
+  // 장비 현황
+  totalEquipments: number;
+  activeEquipments: number;
+  inactiveEquipments: number;
+  
+  // CPU 메트릭
+  avgCpuUsage: number;
+  maxCpuUsage: number;
+  minCpuUsage: number;
+  avgLoadAvg1: number;
+  
+  // 메모리 메트릭
+  avgMemoryUsage: number;
+  maxMemoryUsage: number;
+  minMemoryUsage: number;
+  totalMemoryBytes: number;
+  usedMemoryBytes: number;
+  avgSwapUsage: number;
+  
+  // 디스크 메트릭
+  avgDiskUsage: number;
+  maxDiskUsage: number;
+  minDiskUsage: number;
+  totalDiskBytes: number;
+  usedDiskBytes: number;
+  avgDiskIoUsage: number;
+  
+  // 네트워크 메트릭
+  totalInBps: number;
+  totalOutBps: number;
+  avgRxUsage: number;
+  avgTxUsage: number;
+  totalInErrors: number;
+  totalOutErrors: number;
+  
+  // 온습도 메트릭
+  avgTemperature: number;
+  maxTemperature: number;
+  minTemperature: number;
+  avgHumidity: number;
+  maxHumidity: number;
+  minHumidity: number;
+  temperatureWarnings: number;
+  humidityWarnings: number;
+  
+  // 알림 및 전력
+  totalAlerts: number;
+  criticalAlerts: number;
+  warningAlerts: number;
+  totalPowerUsage: number;
+  avgPowerUsagePerRack: number;
 }

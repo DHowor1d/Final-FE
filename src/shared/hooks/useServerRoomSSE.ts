@@ -1,25 +1,23 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { createDatacenterSSE, type SSEConnection } from "@api/sseClient";
+import { createServerRoomSSE, type SSEConnection } from "@api/sseClient";
 import type {
-  DatacenterMetrics,
+  ServerRoomMetrics,
   LoadAverageData,
-  DiskIOData,
   DiskUsageData,
   CpuUsageData,
   NetworkErrorData,
   NetworkUsageTrend,
   TemperatureHumidityData,
-} from "../types/dashboard.types";
+} from "@domains/mainDashboard/types/dashboard.types";
 
 const MAX_HISTORY_POINTS = 20; // 차트에 표시할 최대 데이터 포인트 수
 
-export interface UseDatacenterSSEResult {
+export interface UseServerRoomSSEResult {
   // 현재 메트릭
-  metrics: DatacenterMetrics | null;
+  metrics: ServerRoomMetrics | null;
   
   // 시계열 데이터
   loadAverageHistory: LoadAverageData[];
-  diskIOHistory: DiskIOData[];
   diskUsageHistory: DiskUsageData[];
   cpuUsageHistory: CpuUsageData[];
   networkErrorHistory: NetworkErrorData[];
@@ -35,21 +33,20 @@ export interface UseDatacenterSSEResult {
 }
 
 /**
- * 데이터센터 실시간 모니터링 SSE Hook
- * @param datacenterId 데이터센터 ID
+ * 서버룸 실시간 모니터링 SSE Hook
+ * @param serverRoomId 서버룸 ID
  * @param enabled 연결 활성화 여부
  */
-export const useDatacenterSSE = (
-  datacenterId: number | null,
+export const useServerRoomSSE = (
+  serverRoomId: number | null,
   enabled: boolean = true
-): UseDatacenterSSEResult => {
-  const [metrics, setMetrics] = useState<DatacenterMetrics | null>(null);
+): UseServerRoomSSEResult => {
+  const [metrics, setMetrics] = useState<ServerRoomMetrics | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // 시계열 데이터 상태
   const [loadAverageHistory, setLoadAverageHistory] = useState<LoadAverageData[]>([]);
-  const [diskIOHistory, setDiskIOHistory] = useState<DiskIOData[]>([]);
   const [diskUsageHistory, setDiskUsageHistory] = useState<DiskUsageData[]>([]);
   const [cpuUsageHistory, setCpuUsageHistory] = useState<CpuUsageData[]>([]);
   const [networkErrorHistory, setNetworkErrorHistory] = useState<NetworkErrorData[]>([]);
@@ -75,7 +72,7 @@ export const useDatacenterSSE = (
 
   // SSE 메시지 처리
   const handleMessage = useCallback(
-    (data: DatacenterMetrics) => {
+    (data: ServerRoomMetrics) => {
       setMetrics(data);
       setError(null);
 
@@ -87,15 +84,6 @@ export const useDatacenterSSE = (
         loadAvg15: data.avgLoadAvg1 * 0.8, // 추정값
       };
       addToHistory(setLoadAverageHistory, loadAvg);
-
-      // 디스크 I/O 데이터 추가
-      const diskIO: DiskIOData = {
-        time: data.timestamp,
-        ioReadBps: data.avgDiskIoUsage * 1000000, // 추정값
-        ioWriteBps: data.avgDiskIoUsage * 800000, // 추정값
-        ioTimePercentage: data.avgDiskIoUsage,
-      };
-      addToHistory(setDiskIOHistory, diskIO);
 
       // 디스크 사용량 데이터 추가
       const diskUsage: DiskUsageData = {
@@ -144,7 +132,7 @@ export const useDatacenterSSE = (
 
   // SSE 연결 관리
   useEffect(() => {
-    if (!enabled || datacenterId === null) {
+    if (!enabled || serverRoomId === null) {
       // 연결 해제
       if (sseConnectionRef.current) {
         sseConnectionRef.current.close();
@@ -155,7 +143,7 @@ export const useDatacenterSSE = (
     }
 
     // SSE 연결 생성
-    sseConnectionRef.current = createDatacenterSSE(datacenterId, {
+    sseConnectionRef.current = createServerRoomSSE(serverRoomId, {
       onMessage: handleMessage,
       onError: (error) => {
         console.error("SSE Error:", error);
@@ -163,7 +151,7 @@ export const useDatacenterSSE = (
         setIsConnected(false);
       },
       onOpen: () => {
-        console.log(`Connected to datacenter ${datacenterId} SSE`);
+        console.log(`Connected to serverRoom ${serverRoomId} SSE`);
         setIsConnected(true);
         setError(null);
       },
@@ -179,7 +167,7 @@ export const useDatacenterSSE = (
       }
       setIsConnected(false);
     };
-  }, [datacenterId, enabled, handleMessage]);
+  }, [serverRoomId, enabled, handleMessage]);
 
   // 수동 재연결 함수
   const reconnect = useCallback(() => {
@@ -191,7 +179,6 @@ export const useDatacenterSSE = (
   return {
     metrics,
     loadAverageHistory,
-    diskIOHistory,
     diskUsageHistory,
     cpuUsageHistory,
     networkErrorHistory,

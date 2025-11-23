@@ -9,7 +9,7 @@ import type {
   NetworkErrorData,
   NetworkUsageTrend,
   TemperatureHumidityData,
-} from "../types/dashboard.types";
+} from "@domains/mainDashboard/types/dashboard.types";
 
 const MAX_HISTORY_POINTS = 20; // 차트에 표시할 최대 데이터 포인트 수
 

@@ -71,7 +71,6 @@ export default function NetworkErrorChart({ data, height = '300px' }: NetworkErr
       boundaryGap: false,
       axisLabel: {
         color: '#9ca3af',
-        rotate: 45,
       },
       axisLine: {
         lineStyle: {

@@ -2,13 +2,13 @@ import { CpuGauge, MemoryGauge, DiskGauge, NetworkGauge } from "./index";
 import {
   NetworkTrafficChart,
   LoadAverageChart,
-  DiskIOChart,
-  ContextSwitchesSparkline,
+  DiskUsageChart,
+  CpuUsageChart,
   NetworkErrorChart,
-  CpuUsageDetailChart,
+  TemperatureHumidityChart,
 } from "./index";
-import { Activity, Wifi, WifiOff, RefreshCw } from "lucide-react";
-import { useDatacenterSSE } from "../hooks/useDatacenterSSE";
+import { Activity } from "lucide-react";
+import { useDatacenterSSE } from "@shared/hooks";
 
 interface DatacenterDashboardProps {
   datacenterId: number;
@@ -19,15 +19,15 @@ export default function DatacenterDashboard({
 }: DatacenterDashboardProps) {
   const {
     metrics,
-    cpuUsageHistory,
     loadAverageHistory,
-    diskIOHistory,
+    diskUsageHistory,
+    cpuUsageHistory,
     networkErrorHistory,
-    contextSwitchesHistory,
     networkTrafficHistory,
-    isConnected,
+    temperatureHumidityHistory,
+    // isConnected,
     error,
-    reconnect,
+    // reconnect,
   } = useDatacenterSSE(datacenterId, true);
 
   // 로딩 상태
@@ -45,7 +45,7 @@ export default function DatacenterDashboard({
   return (
     <div className="space-y-6">
       {/* 연결 상태 표시 */}
-      <div className="flex items-center justify-between bg-neutral-800 rounded-lg p-4 border border-neutral-700">
+      {/* <div className="flex items-center justify-between bg-neutral-800 rounded-lg p-4 border border-neutral-700">
         <div className="flex items-center gap-3">
           {isConnected ? (
             <>
@@ -73,7 +73,7 @@ export default function DatacenterDashboard({
           <RefreshCw size={16} />
           재연결
         </button>
-      </div>
+      </div> */}
 
       {/* 에러 표시 */}
       {error && (
@@ -150,18 +150,28 @@ export default function DatacenterDashboard({
         <CpuGauge value={metrics.avgCpuUsage} />
         <MemoryGauge value={metrics.avgMemoryUsage} />
         <DiskGauge value={metrics.avgDiskUsage} />
-        <NetworkGauge value={metrics.avgDiskIoUsage} />
+        <NetworkGauge value={(metrics.avgRxUsage + metrics.avgTxUsage) / 2} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* CPU 상세 사용률 */}
-        <CpuUsageDetailChart data={cpuUsageHistory} />
+        {/* 온습도 추이 차트 */}
+        <TemperatureHumidityChart
+          data={temperatureHumidityHistory}
+          currentTemp={metrics.avgTemperature}
+          currentHumidity={metrics.avgHumidity}
+          minTemp={metrics.minTemperature}
+          maxTemp={metrics.maxTemperature}
+          minHumidity={metrics.minHumidity}
+          maxHumidity={metrics.maxHumidity}
+          temperatureWarnings={metrics.temperatureWarnings}
+          humidityWarnings={metrics.humidityWarnings}
+        />
 
         {/* 시스템 부하 추세 */}
         <LoadAverageChart data={loadAverageHistory} />
       </div>
 
-      {/* 네트워크 및 디스크 I/O */}
+      {/* 네트워크 및 디스크 사용량 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <NetworkTrafficChart 
           data={{
@@ -170,12 +180,15 @@ export default function DatacenterDashboard({
             networkUsageTrend: networkTrafficHistory,
           }} 
         />
-        <DiskIOChart data={diskIOHistory} />
+        <DiskUsageChart data={diskUsageHistory} />
       </div>
 
-      {/* Context Switches 및 네트워크 에러/드롭 */}
+      {/* 온습도 및 네트워크 에러 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ContextSwitchesSparkline data={contextSwitchesHistory} />
+        {/* CPU 사용량 추이 */}
+        <CpuUsageChart data={cpuUsageHistory} />
+        
+        {/* 네트워크 에러 */}
         <NetworkErrorChart data={networkErrorHistory} />
       </div>
     </div>
