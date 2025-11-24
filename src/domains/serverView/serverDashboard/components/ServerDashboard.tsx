@@ -13,7 +13,7 @@ import ThresholdHeader from "./ThresholdHeader";
 import { useUpdateEquipment } from "../hooks/useUpdateEquipment";
 import { useEquipmentSSE } from "../hooks/useEquipmentSSE";
 import { useMonitoringStore } from "../stores/monitoringStore";
-import { buildChartData } from "../utils/chartDataBuilder";
+import { buildChartData, type HistoryRecord } from "../utils/chartDataBuilder";
 import { DEFAULT_THRESHOLD_VALUES } from "../constants";
 import type { Equipments } from "../../rack/types";
 
@@ -107,13 +107,12 @@ function ServerDashboard({
     );
   };
 
-  // 차트 데이터 생성 - buildChartData로 간결화
   const chartData = useMemo(() => {
     return buildChartData({
       systemData,
       diskData,
-      systemHistory,
-      diskHistory,
+      systemHistory: systemHistory as unknown as HistoryRecord[],
+      diskHistory: diskHistory as unknown as HistoryRecord[],
       networkHistory,
     });
   }, [systemData, diskData, systemHistory, diskHistory, networkHistory]);
