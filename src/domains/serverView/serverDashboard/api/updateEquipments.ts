@@ -1,5 +1,5 @@
 import client from "@/api/client";
-import type { UpdateEquipmentRequest } from "../types/src/types";
+import type { UpdateEquipmentRequest } from "../types";
 
 export interface EquipmentDetail {
   id: number;
