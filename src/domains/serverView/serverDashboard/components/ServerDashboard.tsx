@@ -11,7 +11,6 @@ import AreaLineChart from "./AreaLineChart";
 import ChartCard from "./ChartCard";
 import ThresholdHeader from "./ThresholdHeader";
 import { useUpdateEquipment } from "../hooks/useUpdateEquipment";
-import { useEquipmentSSE } from "../hooks/useEquipmentSSE";
 import { useMonitoringStore } from "../stores/monitoringStore";
 import { buildChartData, type HistoryRecord } from "../utils/chartDataBuilder";
 import { DEFAULT_THRESHOLD_VALUES } from "../constants";
@@ -43,7 +42,6 @@ function ServerDashboard({
   currentEquipment,
 }: ServerDashboardProps) {
   const { mutate: updateEquipment, isPending } = useUpdateEquipment();
-  useEquipmentSSE(deviceId, isOpen);
 
   const { systemData, diskData, systemHistory, diskHistory, networkHistory } =
     useMonitoringStore();
