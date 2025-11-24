@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useStore } from "zustand";
 import { useState, useRef, useEffect } from "react";
 import {
@@ -37,6 +37,7 @@ function ServerViewHeader({
   onViewDimensionChange,
 }: ServerViewHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { serverRoomName } = useServerRoomEquipment(serverRoomId ?? "");
 
   const { confirm } = useConfirmationModal();
@@ -63,7 +64,13 @@ function ServerViewHeader({
   }, []);
 
   const handleBackNavigation = () => {
-    navigate("/server-room-dashboard");
+    // location state에서 데이터센터 ID를 가져와서 해당 데이터센터로 이동
+    const dataCenterId = (location.state as { dataCenterId?: number })?.dataCenterId;
+    if (dataCenterId) {
+      navigate(`/server-room-dashboard/${dataCenterId}`);
+    } else {
+      navigate("/server-room-dashboard");
+    }
   };
 
   const undo = useStore(useFloorPlanStore.temporal, (state) => state.undo);
@@ -269,7 +276,7 @@ function ServerViewHeader({
             )}
             {/* 편집 모드 컨트롤 */}
             {mode === "edit" && (
-              <div className="flex items-center gap-2 border border-gray-600 rounded-lg p-1 bg-gray-700/50">
+              <div className="flex items-center gap-2 border border-gray-600 rounded-lg bg-gray-700/50">
                 <button
                   onClick={() => undo()}
                   className="p-2 rounded-md flex items-center gap-1.5 text-gray-100 hover:bg-gray-600 transition-colors"

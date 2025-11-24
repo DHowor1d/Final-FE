@@ -9,7 +9,7 @@ interface DashboardStatsProps {
 
 function StatItem({ value, label, colorClass }: { value: number; label: string; colorClass: string }) {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center rounded-full">
       <span className={`text-2xl font-bold ${colorClass}`}>{value}</span>
       <span className="text-xs text-gray-400">{label}</span>
     </div>
@@ -22,7 +22,7 @@ function Divider() {
 
 export function DashboardStats({ stats }: DashboardStatsProps) {
   return (
-  <div className="flex items-center gap-6 px-8 ml-6 border-l-2 border-gray-50/50">
+  <div className="flex items-center gap-6 px-8 ml-6 border-l-4 border-gray-50/50">
     <StatItem value={stats.totalDataCenters} label="총 데이터센터" colorClass="text-gray-50" />
     <Divider />
     <StatItem value={stats.totalRooms} label="총 서버실" colorClass="text-gray-50" />
