@@ -8,6 +8,7 @@ import ServerDashboard from "@domains/serverView/serverDashboard/components/Serv
 import { useMonitoringStore } from "../../serverDashboard/stores/monitoringStore";
 import { useEquipmentSSE } from "../../serverDashboard/hooks/useEquipmentSSE";
 import { useAllEquipmentBackgroundSSE } from "../../serverDashboard/hooks/useAllEquipmentBackgroundSSE";
+import { useAuthStore } from "@/domains/login/store/useAuthStore";
 
 interface RackViewProps {
   onClose?: () => void;
@@ -25,6 +26,8 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
   } | null>(null);
 
   const { deviceMetricsMap, setSelectedDeviceId } = useMonitoringStore();
+  const { user } = useAuthStore();
+  const view = user?.role === "VIEWER";
 
   const rackId = useMemo(() => {
     if (!rackName) return undefined;
@@ -81,6 +84,12 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
       setDashboardOpen(false);
     }
   }, [editMode]);
+
+  useEffect(() => {
+    if (view && editMode) {
+      setEditMode(false);
+    }
+  }, [view]);
 
   const displayRackName = rackManager.rack?.rackName || rackName || "N/A";
 
@@ -150,18 +159,20 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
               <RackHeader rackName={displayRackName} />
             </div>
 
-            <div className="flex items-center gap-4 ml-4">
-              <Button
-                label={editMode ? "보기" : "편집"}
-                onClick={() => setEditMode(!editMode)}
-                active={editMode}
-              />
-              <Button
-                label={frontView ? "뒷면" : "앞면"}
-                onClick={() => setFrontView(!frontView)}
-                active={frontView}
-              />
-            </div>
+            {!view && (
+              <div className="flex items-center gap-4 ml-4">
+                <Button
+                  label={editMode ? "보기" : "편집"}
+                  onClick={() => setEditMode(!editMode)}
+                  active={editMode}
+                />
+                <Button
+                  label={frontView ? "뒷면" : "앞면"}
+                  onClick={() => setFrontView(!frontView)}
+                  active={frontView}
+                />
+              </div>
+            )}
           </header>
 
           <div className="flex flex-1 min-h-0 overflow-visible">
@@ -200,5 +211,4 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     </div>
   );
 }
-
 export default RackView;
