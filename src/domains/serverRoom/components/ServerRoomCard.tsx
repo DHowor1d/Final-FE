@@ -8,17 +8,20 @@ import "../css/serverRoomCard.css";
 
 interface Props {
   room: ServerRoom;
+  dataCenterId: number;
   dataCenterAddress: string;
   onEditClick: (serverRoom: ServerRoom) => void;
   onDeleteClick: (serverRoom: ServerRoom) => void;
 }
 
-function ServerRoomCard({ room, dataCenterAddress, onEditClick, onDeleteClick }: Props) {
+function ServerRoomCard({ room, dataCenterId, dataCenterAddress, onEditClick, onDeleteClick }: Props) {
   const navigate = useNavigate();
 
   const handleViewLayout = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/server-room/${room.id}/view`);
+    navigate(`/server-room/${room.id}/view`, {
+      state: { dataCenterId }
+    });
   };
 
   const handleEditClick = (e: React.MouseEvent) => {

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import ServerRoomList from "../components/ServerRoomList";
 import { DashboardStats } from "../components/DashboardStats";
 import { DataCenterTabs } from "../components/DataCenterTabs";
@@ -10,7 +11,11 @@ import { useAuthStore } from "@domains/login/store/useAuthStore";
 import "../css/serverRoomDashboard.css";
 
 const ServerRoomDashboard: React.FC = () => {
-  const [selectedDataCenterId, setSelectedDataCenterId] = useState<number | null>(null);
+  const { datacenterId } = useParams<{ datacenterId: string }>();
+  const navigate = useNavigate();
+  const [selectedDataCenterId, setSelectedDataCenterId] = useState<number | null>(
+    datacenterId ? parseInt(datacenterId, 10) : null
+  );
 
   // 로그인한 사용자의 회사 ID 가져오기
   const { user } = useAuthStore();
@@ -43,6 +48,13 @@ const ServerRoomDashboard: React.FC = () => {
       setSelectedDataCenterId(dataCenters[0].dataCenterId);
     }
   }, [dataCenters, selectedDataCenterId]);
+
+  // 선택된 데이터센터가 변경되면 URL 업데이트
+  useEffect(() => {
+    if (selectedDataCenterId !== null) {
+      navigate(`/server-room-dashboard/${selectedDataCenterId}`, { replace: true });
+    }
+  }, [selectedDataCenterId, navigate]);
 
   // 선택된 데이터센터 필터링
   const filteredDataCenters = useMemo(() => {

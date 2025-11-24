@@ -5,6 +5,7 @@ import GridFloor from './GridFloor';
 import Equipment3DModel from './Equipment3DModel';
 import EquipmentPalette3D from '../../components/EquipmentPalette3D';
 import ContextMenu from './ContextMenu';
+import GridAreaContextMenu from './GridAreaContextMenu';
 import SelectionBox from './SelectionBox';
 import { useBabylonDatacenterStore } from '../stores/useBabylonDatacenterStore';
 import { EQUIPMENT_PALETTE } from '../../constants/config';
@@ -16,6 +17,9 @@ import { useEquipmentDragAndDrop } from '../hooks/useEquipmentDragAndDrop';
 import { useEquipmentSelection } from '../hooks/useEquipmentSelection';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { LoadingSpinner } from '@/shared/loading';
+import { createDevice } from '../api/serverRoomEquipmentApi';
+import { getNextDeviceNumber, generateDeviceName } from '../utils/deviceNameGenerator';
+import type { EquipmentType, Equipment3D } from '../../types';
 
 interface BabylonDatacenterViewProps {
   mode?: 'edit' | 'view'; // 초기 모드 (기본값: view)
@@ -34,6 +38,12 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
     equipmentId: string;
   } | null>(null);
 
+  // 빈 영역 컨텍스트 메뉴 상태
+  const [gridAreaContextMenu, setGridAreaContextMenu] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
   // Zustand 스토어
   const {
     gridConfig,
@@ -47,6 +57,8 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
     initializeServerRoom,
     clearSelection,
     setGridConfig,
+    selectedEmptyArea,
+    getEmptyGridsInArea,
   } = useBabylonDatacenterStore();
 
   // 서버실 데이터 로드
@@ -170,15 +182,104 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
     setContextMenu(null);
   }, [contextMenu, selectedEquipmentIds, handleDeleteEquipment]);
 
+  // 빈 영역 우클릭 핸들러
+  const handleGridAreaRightClick = useCallback((x: number, y: number) => {
+    // 선택된 영역이 있고, 빈 격자가 있는 경우에만 메뉴 표시
+    if (selectedEmptyArea) {
+      const emptyGrids = getEmptyGridsInArea(
+        selectedEmptyArea.startX,
+        selectedEmptyArea.startY,
+        selectedEmptyArea.endX,
+        selectedEmptyArea.endY
+      );
+      
+      if (emptyGrids.length > 0) {
+        setGridAreaContextMenu({ x, y });
+      }
+    }
+  }, [selectedEmptyArea, getEmptyGridsInArea]);
+
+  // 빈 영역 컨텍스트 메뉴 닫기
+  const handleGridAreaContextMenuClose = useCallback(() => {
+    setGridAreaContextMenu(null);
+  }, []);
+
+  // 빈 영역에 장비 일괄 배치
+  const handleBulkPlaceEquipment = useCallback(async (type: EquipmentType) => {
+    if (!selectedEmptyArea || !serverRoomId) return;
+
+    const emptyGrids = getEmptyGridsInArea(
+      selectedEmptyArea.startX,
+      selectedEmptyArea.startY,
+      selectedEmptyArea.endX,
+      selectedEmptyArea.endY
+    );
+
+    if (emptyGrids.length === 0) {
+      showToast('배치할 수 있는 빈 공간이 없습니다', 'error');
+      return;
+    }
+
+    try {
+      const createdEquipments: Equipment3D[] = [];
+      
+      // 각 빈 격자에 순차적으로 장비 생성 (병렬 처리 시 deviceCode 중복 방지)
+      for (let i = 0; i < emptyGrids.length; i++) {
+        const grid = emptyGrids[i];
+        
+        // 현재까지 생성된 장비 목록 (equipment + 이미 생성된 장비들)
+        const currentEquipment = [...equipment, ...createdEquipments];
+        
+        const nextNumber = getNextDeviceNumber(currentEquipment, type, serverRoomId);
+        const deviceName = generateDeviceName(type, serverRoomId, nextNumber);
+
+        const created = await createDevice(
+          {
+            type,
+            gridX: grid.gridX,
+            gridY: grid.gridY,
+            gridZ: 0,
+            rotation: 0,
+            metadata: {
+              name: deviceName,
+              status: 'NORMAL',
+            },
+          },
+          Number(serverRoomId),
+          currentEquipment // 업데이트된 목록 전달
+        );
+        
+        createdEquipments.push(created);
+      }
+
+      // Store에 한 번에 추가
+      useBabylonDatacenterStore.setState((state) => ({
+        equipment: [...state.equipment, ...createdEquipments],
+        selectedEmptyArea: null, // 배치 완료 후 선택 영역 제거
+      }));
+
+      showToast(`${createdEquipments.length}개 장치가 배치되었습니다`, 'success');
+    } catch (error) {
+      console.error('Failed to bulk place equipment:', error);
+      showToast('장치 배치에 실패했습니다', 'error');
+    }
+  }, [selectedEmptyArea, serverRoomId, getEmptyGridsInArea, equipment, showToast, clearSelection]);
+
   return (
     <div className="h-full w-full overflow-hidden relative">
       <canvas
         ref={canvasRef}
         className="w-full h-full outline-none"
         style={{ touchAction: 'none' }}
-        onContextMenu={(e) => e.preventDefault()} // 우클릭 기본 메뉴 방지
-        onDrop={mode === 'edit' ? handleDrop : undefined} // 편집 모드에서만 드롭 허용
-        onDragOver={mode === 'edit' ? handleDragOver : undefined} // 드래그 오버 허용
+        onContextMenu={(e) => {
+          e.preventDefault();
+          // 선택된 빈 영역이 있으면 컨텍스트 메뉴 표시
+          if (mode === 'edit' && selectedEmptyArea && selectedEquipmentIds.length === 0) {
+            handleGridAreaRightClick(e.clientX, e.clientY);
+          }
+        }}
+        onDrop={mode === 'edit' ? handleDrop : undefined}
+        onDragOver={mode === 'edit' ? handleDragOver : undefined}
       />
 
       {/* 로딩 표시  */}
@@ -193,6 +294,7 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
           <li>• 좌클릭 드래그 (배경): 카메라 회전</li>
           {mode === 'edit' && <li>• 좌클릭 드래그 (장비): 장비 이동</li>}
           {mode === 'edit' && <li>• Ctrl+드래그 (배경): 영역 선택</li>}
+          {mode === 'edit' && selectedEmptyArea && <li>• 우클릭 (선택된 영역): 다중 배치</li>}
           <li>• 우클릭 드래그: 카메라 이동</li>
           <li>• 마우스 휠: 줌 인/아웃</li>
           {mode === 'edit' && selectedEquipmentIds.length > 0 && (
@@ -204,38 +306,36 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
         </ul>
       </div>
 
-      {/* 회전 버튼 */}
-      {mode === 'edit' && selectedEquipmentIds.length === 1 && (
+      {/* 회전 버튼 - 단일 또는 다중 선택 시 모두 표시 */}
+      {mode === 'edit' && selectedEquipmentIds.length >= 1 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 border border-slate-300/40 backdrop-blur-sm rounded-lg p-3 text-white text-xs flex items-center gap-2">
+          {selectedEquipmentIds.length > 1 && (
+            <span className="font-semibold">{selectedEquipmentIds.length}개 선택됨</span>
+          )}
           <span className="font-semibold">회전</span>
           <button
             type="button"
-            onClick={() => handleRotateEquipment(false)}
+            onClick={() => handleRotateEquipment(false, selectedEquipmentIds)}
             className="bg-gray-700 hover:bg-gray-600 text-white rounded-md px-3 py-1 text-sm"
           >
             ⟲ 90°
           </button>
           <button
             type="button"
-            onClick={() => handleRotateEquipment(true)}
+            onClick={() => handleRotateEquipment(true, selectedEquipmentIds)}
             className="bg-gray-700 hover:bg-gray-600 text-white rounded-md px-3 py-1 text-sm"
           >
             ⟳ 90°
           </button>
-        </div>
-      )}
-      
-      {/* 다중 선택 시 삭제 버튼 */}
-      {mode === 'edit' && selectedEquipmentIds.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 border border-slate-300/40 backdrop-blur-sm rounded-lg p-3 text-white text-xs flex items-center gap-2">
-          <span className="font-semibold">{selectedEquipmentIds.length}개 선택됨</span>
-          <button
-            type="button"
-            onClick={() => handleDeleteEquipment(selectedEquipmentIds)}
-            className="bg-red-700 hover:bg-red-600 text-white rounded-md px-3 py-1 text-sm"
-          >
-            🗑️ 삭제
-          </button>
+          {selectedEquipmentIds.length > 1 && (
+            <button
+              type="button"
+              onClick={() => handleDeleteEquipment(selectedEquipmentIds)}
+              className="bg-red-700 hover:bg-red-600 text-white rounded-md px-3 py-1 text-sm ml-2"
+            >
+              🗑️ 삭제
+            </button>
+          )}
         </div>
       )}
 
@@ -287,6 +387,18 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
               cellSize={gridConfig.cellSize}
             />
           )}
+          
+          {/* 선택된 빈 영역 표시 */}
+          {mode === 'edit' && selectedEmptyArea && !selectionArea && (
+            <SelectionBox
+              scene={scene}
+              startGridX={selectedEmptyArea.startX}
+              startGridY={selectedEmptyArea.startY}
+              endGridX={selectedEmptyArea.endX}
+              endGridY={selectedEmptyArea.endY}
+              cellSize={gridConfig.cellSize}
+            />
+          )}
         </>
       )}
 
@@ -297,6 +409,16 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
           y={contextMenu.y}
           onClose={handleContextMenuClose}
           onDelete={handleContextMenuDelete}
+        />
+      )}
+
+      {/* 빈 영역 컨텍스트 메뉴 */}
+      {gridAreaContextMenu && (
+        <GridAreaContextMenu
+          x={gridAreaContextMenu.x}
+          y={gridAreaContextMenu.y}
+          onClose={handleGridAreaContextMenuClose}
+          onSelectEquipment={handleBulkPlaceEquipment}
         />
       )}
 

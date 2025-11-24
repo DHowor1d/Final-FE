@@ -18,7 +18,8 @@ function ServerRoomList({ dataCenters, onEditClick, onDeleteClick }: Props) {
             {dataCenter.serverRooms.map((room) => (
               <ServerRoomCard 
                 key={room.id} 
-                room={room} 
+                room={room}
+                dataCenterId={dataCenter.dataCenterId}
                 dataCenterAddress={dataCenter.dataCenterAddress}
                 onEditClick={onEditClick}
                 onDeleteClick={onDeleteClick}
