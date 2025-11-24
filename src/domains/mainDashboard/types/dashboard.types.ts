@@ -243,6 +243,98 @@ export interface DatacenterMetrics {
   serverRoomSummaries: ServerRoomSummary[];
 }
 
+// 랙 실시간 메트릭 (SSE)
+export interface RackMetrics {
+  rackId: number;
+  rackName: string;
+  timestamp: string;
+  
+  // 환경 정보
+  environment: {
+    temperature: number;
+    minTemperature: number;
+    maxTemperature: number;
+    humidity: number;
+    minHumidity: number;
+    maxHumidity: number;
+    temperatureWarning: string | null;
+    humidityWarning: string | null;
+  };
+  
+  // 랙 요약
+  rackSummary: {
+    totalEquipmentCount: number;
+    normalCount: number;
+    warningCount: number;
+    errorCount: number;
+    activeEquipmentTypes: Array<{
+      type: string;
+      count: number;
+    }>;
+  };
+  
+  // CPU 통계
+  cpuStats: {
+    avgUsage: number;
+    maxUsage: number;
+    topEquipments: Array<{
+      equipmentId: number;
+      equipmentName: string;
+      value: number;
+    }>;
+    equipmentCount: number;
+  };
+  
+  // 메모리 통계
+  memoryStats: {
+    avgUsage: number;
+    maxUsage: number;
+    topEquipments: Array<{
+      equipmentId: number;
+      equipmentName: string;
+      value: number;
+    }>;
+    equipmentCount: number;
+    totalMemoryGB: number;
+    usedMemoryGB: number;
+  };
+  
+  // 디스크 통계
+  diskStats: {
+    avgUsage: number;
+    maxUsage: number;
+    topEquipments: Array<{
+      equipmentId: number;
+      equipmentName: string;
+      value: number;
+    }>;
+    equipmentCount: number;
+    totalCapacityTB: number;
+    usedCapacityTB: number;
+  };
+  
+  // 네트워크 통계
+  networkStats: {
+    totalRxMbps: number;
+    totalTxMbps: number;
+    avgRxUsage: number;
+    avgTxUsage: number;
+    topRxEquipments: Array<{
+      equipmentId: number;
+      equipmentName: string;
+      value: number;
+    }>;
+    topTxEquipments: Array<{
+      equipmentId: number;
+      equipmentName: string;
+      value: number;
+    }>;
+    errorPacketRate: number;
+    dropPacketRate: number;
+    equipmentCount: number;
+  };
+}
+
 // 시계열 데이터 포인트
 export interface TimeSeriesDataPoint {
   timestamp: string;

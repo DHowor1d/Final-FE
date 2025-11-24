@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import ServerViewHeader from '../components/ServerViewHeader';
 import ServerRoomStatsPanel from '../components/ServerRoomStatsPanel';
+import ServerRoomHistoryPanel from '../components/ServerRoomHistoryPanel';
 import BabylonDatacenterView from '../view3d/components/BabylonDatacenterView';
 import RackModal from '../components/RackModal';
 import FloorPlanPage from '../floorPlan/pages/FloorPlanPage';
@@ -34,11 +35,13 @@ function ServerViewPage() {
         {viewDimension === '3D' ? (
           <div className="flex-1 overflow-hidden relative">
             {id && <ServerRoomStatsPanel serverRoomId={Number(id)} />}
+            {id && <ServerRoomHistoryPanel serverRoomId={Number(id)} />}
             <BabylonDatacenterView mode="view" serverRoomId={id} />
           </div>
         ) : (
           <div className="flex-1 overflow-hidden relative">
             {id && <ServerRoomStatsPanel serverRoomId={Number(id)} />}
+            {id && <ServerRoomHistoryPanel serverRoomId={Number(id)} />}
             <FloorPlanPage containerRef={canvasContainerRef} serverRoomId={id} />
           </div>
         )}

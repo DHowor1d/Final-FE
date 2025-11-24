@@ -68,11 +68,7 @@ function MainDashboard() {
     }
 
     if (selectedNode.level === 'rack' && selectedNode.serverRoomId && selectedNode.rackId) {
-      const serverRoom = datacenter.serverRooms.find((sr) => sr.id === selectedNode.serverRoomId);
-      const rack = serverRoom?.racks.find((r) => r.id === selectedNode.rackId);
-      if (!serverRoom || !rack) return <div className="text-gray-400">랙을 찾을 수 없습니다.</div>;
-
-      return <RackDashboard rack={rack} />;
+      return <RackDashboard rackId={selectedNode.rackId} />;
     }
 
     return null;
@@ -91,7 +87,7 @@ function MainDashboard() {
   return (
     <div className="flex h-screen bg-neutral-900">
       {/* 왼쪽 사이드바 */}
-      <div className="w-70 flex-shrink-0">
+      <div className="w-74 flex-shrink-0">
         {selectedNode && (
           <HierarchySidebar
             datacenters={datacenters}
