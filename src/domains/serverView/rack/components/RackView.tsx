@@ -135,7 +135,7 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
 
   return (
     <div className="h-full flex text-white gap-2 p-2">
-      {/* 왼쪽: 대시보드 영역 - 항상 2 비율 유지 */}v{" "}
+      {/* 왼쪽: 대시보드 영역 - 항상 2 비율 유지 */}
       <div
         className="flex-[2] overflow-hidden relative"
         onClick={handleSidebarClick}
