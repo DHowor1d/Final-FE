@@ -3,7 +3,7 @@ import { useRackManager } from "../hooks/useRackManager";
 import Sidebar from "./Sidebar";
 import RackHeader from "./RackHeader";
 import Button from "./Button";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import ServerDashboard from "@domains/serverView/serverDashboard/components/ServerDashboard";
 import { useMonitoringStore } from "../../serverDashboard/stores/monitoringStore";
 import { useEquipmentSSE } from "../../serverDashboard/hooks/useEquipmentSSE";
@@ -25,7 +25,14 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     name: string;
   } | null>(null);
 
-  const { deviceMetricsMap, setSelectedDeviceId } = useMonitoringStore();
+  const {
+    deviceMetricsMap,
+    setSelectedDeviceId,
+    setSystemData,
+    setDiskData,
+    setNetworkData,
+    setDeviceMetrics,
+  } = useMonitoringStore();
   const { user } = useAuthStore();
   const view = user?.role === "VIEWER";
 
@@ -68,10 +75,44 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     return [];
   }, [rackManager.isLoading, selectableEquipmentIds]);
 
-  useAllEquipmentBackgroundSSE(backgroundSSEEquipmentIds);
+  const backgroundCallbacks = useCallback(
+    () => ({
+      onMetricsUpdate: setDeviceMetrics,
+      onConnectionError: (equipmentId: number, error: Event) => {
+        console.error(
+          `[Rack ${rackId}] Background SSE error for equipment ${equipmentId}:`,
+          error
+        );
+      },
+    }),
+    [rackId, setDeviceMetrics]
+  );
 
+  const equipmentCallbacks = useCallback(
+    () => ({
+      onSystemData: setSystemData,
+      onDiskData: setDiskData,
+      onNetworkData: setNetworkData,
+      onError: (error: Event) => {
+        console.error(
+          `[Rack ${rackId}] Equipment SSE error for device ${selectedDevice?.id}:`,
+          error
+        );
+      },
+    }),
+    [rackId, selectedDevice?.id, setSystemData, setDiskData, setNetworkData]
+  );
+
+  // 백그라운드 메트릭 수집 (모든 장비)
+  useAllEquipmentBackgroundSSE(
+    backgroundSSEEquipmentIds,
+    backgroundCallbacks()
+  );
+
+  // 선택된 장비 상세 데이터 수집
   useEquipmentSSE(
-    selectedDevice?.id || 0,
+    selectedDevice?.id || null,
+    equipmentCallbacks(),
     dashboardOpen && selectedDevice?.id !== 0
   );
 
