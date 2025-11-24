@@ -22,6 +22,7 @@ export function useEquipmentSelection({
     setSelectionArea,
     selectEquipmentInArea,
     clearSelection,
+    setSelectedEmptyArea,
   } = useBabylonDatacenterStore();
 
   const [isDraggingSelection, setIsDraggingSelection] = useState(false);
@@ -94,13 +95,26 @@ export function useEquipmentSelection({
         return;
       }
 
-      // 배경 클릭: 선택 해제
+      // 배경 클릭: 장비 선택만 해제 (selectedEmptyArea는 유지)
       if (pickResult.hit && pickResult.pickedMesh?.name === 'ground') {
+        // 장비 선택만 해제
+        const { clearSelection, setSelectedEmptyArea, selectedEmptyArea } = useBabylonDatacenterStore.getState();
+        // selectedEmptyArea 백업
+        const currentEmptyArea = selectedEmptyArea;
         clearSelection();
+        // selectedEmptyArea 복원
+        if (currentEmptyArea) {
+          setSelectedEmptyArea(currentEmptyArea);
+        }
         setSelectionStart(null);
         setIsDraggingSelection(false);
       } else if (!pickResult.hit) {
+        const { clearSelection, setSelectedEmptyArea, selectedEmptyArea } = useBabylonDatacenterStore.getState();
+        const currentEmptyArea = selectedEmptyArea;
         clearSelection();
+        if (currentEmptyArea) {
+          setSelectedEmptyArea(currentEmptyArea);
+        }
         setSelectionStart(null);
         setIsDraggingSelection(false);
       }
@@ -130,6 +144,14 @@ export function useEquipmentSelection({
             gridPos.gridX,
             gridPos.gridY
           );
+          
+          // 빈 영역 선택 정보도 저장 (우클릭 메뉴용)
+          setSelectedEmptyArea({
+            startX: selectionStart.gridX,
+            startY: selectionStart.gridY,
+            endX: gridPos.gridX,
+            endY: gridPos.gridY,
+          });
         }
         setIsDraggingSelection(false);
         setSelectionStart(null);

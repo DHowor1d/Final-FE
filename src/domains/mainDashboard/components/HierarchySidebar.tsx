@@ -5,7 +5,7 @@ import { Database, Building2, Server } from 'lucide-react';
 
 interface HierarchySidebarProps {
   datacenters: Datacenter[];
-  selectedNode: SelectedNode;
+  selectedNode: SelectedNode | null;
   onSelectNode: (node: SelectedNode) => void;
   onServerRoomExpand?: (serverRoomId: number) => void; // 서버실 확장 시 랙 로드
   onDatacenterExpand?: (datacenterId: number) => void; // 데이터센터 확장 시 모든 서버실 랙 프리페치
@@ -19,6 +19,8 @@ export default function HierarchySidebar({
   onDatacenterExpand
 }: HierarchySidebarProps) {
   const getSelectedItemId = () => {
+    if (!selectedNode) return '';
+    
     if (selectedNode.level === 'rack') {
       return `rack-${selectedNode.rackId}`;
     }

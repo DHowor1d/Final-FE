@@ -20,6 +20,7 @@ export function useEquipmentActions({
     equipment,
     selectedEquipmentId,
     rotateEquipment90,
+    rotateMultipleEquipments90,
     removeEquipment,
     clearSelection,
     isValidPosition,
@@ -72,31 +73,50 @@ export function useEquipmentActions({
     [serverRoomId, gridConfig.columns, gridConfig.rows, equipment, showToast]
   );
 
-  // 장비 회전
+  // 장비 회전 (단일 또는 다중)
   const handleRotateEquipment = useCallback(
-    (clockwise: boolean) => {
-      if (!selectedEquipmentId) return;
+    async (clockwise: boolean, equipmentIds?: string[]) => {
+      // equipmentIds가 제공되지 않으면 selectedEquipmentId 사용
+      const idsToRotate = equipmentIds || (selectedEquipmentId ? [selectedEquipmentId] : []);
+      
+      if (idsToRotate.length === 0) return;
 
-      const equipmentToRotate = equipment.find((eq) => eq.id === selectedEquipmentId);
-      if (!equipmentToRotate) return;
+      const equipmentsToRotate = equipment.filter((eq) => idsToRotate.includes(eq.id));
+      if (equipmentsToRotate.length === 0) return;
 
-      rotateEquipment90(selectedEquipmentId, clockwise);
+      // Store 업데이트 (단일 또는 다중)
+      if (idsToRotate.length === 1) {
+        rotateEquipment90(idsToRotate[0], clockwise);
+      } else {
+        rotateMultipleEquipments90(idsToRotate, clockwise);
+      }
 
+      // API 호출
       const rotation90 = Math.PI / 2;
-      const newRotation = clockwise
-        ? equipmentToRotate.rotation + rotation90
-        : equipmentToRotate.rotation - rotation90;
-      const normalizedRotation = ((newRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      try {
+        await Promise.all(
+          equipmentsToRotate.map(async (equipmentToRotate) => {
+            const newRotation = clockwise
+              ? equipmentToRotate.rotation + rotation90
+              : equipmentToRotate.rotation - rotation90;
+            const normalizedRotation = ((newRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 
-      updateEquipment({
-        ...equipmentToRotate,
-        rotation: normalizedRotation,
-      }).catch((error) => {
+            return updateEquipment({
+              ...equipmentToRotate,
+              rotation: normalizedRotation,
+            });
+          })
+        );
+        
+        if (idsToRotate.length > 1) {
+          showToast(`${idsToRotate.length}개 장치가 회전되었습니다`, 'success');
+        }
+      } catch (error) {
         console.error('Failed to rotate equipment:', error);
         showToast('장비 회전에 실패했습니다', 'error');
-      });
+      }
     },
-    [selectedEquipmentId, equipment, rotateEquipment90, showToast]
+    [selectedEquipmentId, equipment, rotateEquipment90, rotateMultipleEquipments90, showToast]
   );
 
   // 장비 삭제
@@ -155,7 +175,7 @@ export function useEquipmentActions({
 
   // 다중 장비 위치 업데이트
   const handleMultipleEquipmentPositionsChange = useCallback(
-    (
+    async (
       updates: {
         id: string;
         gridX: number;
@@ -163,16 +183,39 @@ export function useEquipmentActions({
         originalGridX: number;
         originalGridY: number;
       }[]
-    ): boolean => {
+    ): Promise<boolean> => {
       const result = updateMultipleEquipmentPositions(updates);
 
       if (!result) {
         showToast('선택된 장치들을 이동할 수 없습니다 (격자 범위 벗어남 또는 위치 중복)', 'error');
+        return false;
       }
 
-      return result;
+      // Store 업데이트가 성공하면 API 호출
+      try {
+        await Promise.all(
+          updates.map(async (update) => {
+            const equipmentToUpdate = equipment.find((eq) => eq.id === update.id);
+            if (equipmentToUpdate) {
+              await updateEquipment({
+                ...equipmentToUpdate,
+                gridX: update.gridX,
+                gridY: update.gridY,
+              });
+            }
+          })
+        );
+        
+        console.log(`✅ ${updates.length}개 장비 위치 API 업데이트 성공`);
+        showToast(`${updates.length}개 장치가 이동되었습니다`, 'success');
+        return true;
+      } catch (error) {
+        console.error('Failed to update multiple equipment positions:', error);
+        showToast('장비 위치 업데이트에 실패했습니다', 'error');
+        return false;
+      }
     },
-    [updateMultipleEquipmentPositions, showToast]
+    [updateMultipleEquipmentPositions, equipment, showToast]
   );
 
   return {

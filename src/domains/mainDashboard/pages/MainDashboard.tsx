@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HierarchySidebar from '../components/HierarchySidebar';
 import Breadcrumb from '../components/Breadcrumb';
 import DatacenterDashboard from '../components/DatacenterDashboard';
@@ -12,10 +12,19 @@ function MainDashboard() {
   
   const { datacenters, isLoading, error, loadServerRoomRacks, prefetchDatacenterRacks } = useDashboardData(COMPANY_ID);
 
-  const [selectedNode, setSelectedNode] = useState<SelectedNode>({
-    level: 'datacenter',
-    datacenterId: datacenters[0]?.id || 0,
-  });
+  const [selectedNode, setSelectedNode] = useState<SelectedNode | null>(null);
+
+  // 데이터센터가 로드되면 첫 번째 데이터센터 자동 선택
+  useEffect(() => {
+    if (datacenters && datacenters.length > 0 && !selectedNode) {
+      setSelectedNode({
+        level: 'datacenter',
+        datacenterId: datacenters[0].id,
+      });
+      // 첫 번째 데이터센터의 랙 정보 프리페치
+      prefetchDatacenterRacks(datacenters[0].id);
+    }
+  }, [datacenters, selectedNode, prefetchDatacenterRacks]);
 
   // 로딩 상태
   if (isLoading) {
@@ -45,6 +54,8 @@ function MainDashboard() {
   }
 
   const renderDashboard = () => {
+    if (!selectedNode) return null;
+    
     const datacenter = datacenters.find((dc) => dc.id === selectedNode.datacenterId);
     if (!datacenter) return <div className="text-gray-400">데이터센터를 찾을 수 없습니다.</div>;
 
@@ -81,21 +92,27 @@ function MainDashboard() {
     <div className="flex h-screen bg-neutral-900">
       {/* 왼쪽 사이드바 */}
       <div className="w-70 flex-shrink-0">
-        <HierarchySidebar
-          datacenters={datacenters}
-          selectedNode={selectedNode}
-          onSelectNode={setSelectedNode}
-          onServerRoomExpand={handleServerRoomExpand}
-          onDatacenterExpand={handleDatacenterExpand}
-        />
+        {selectedNode && (
+          <HierarchySidebar
+            datacenters={datacenters}
+            selectedNode={selectedNode}
+            onSelectNode={setSelectedNode}
+            onServerRoomExpand={handleServerRoomExpand}
+            onDatacenterExpand={handleDatacenterExpand}
+          />
+        )}
       </div>
 
       {/* 오른쪽 대시보드 영역 */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Breadcrumb selectedNode={selectedNode} datacenters={datacenters} />
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
-          <div className="p-6">{renderDashboard()}</div>
-        </div>
+        {selectedNode && (
+          <>
+            <Breadcrumb selectedNode={selectedNode} datacenters={datacenters} />
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+              <div className="p-6">{renderDashboard()}</div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

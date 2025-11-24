@@ -30,6 +30,10 @@ const router = createBrowserRouter([
             element: <ServerRoomDashboard />,
           },
           {
+            path: "server-room-dashboard/:datacenterId",
+            element: <ServerRoomDashboard />,
+          },
+          {
             path: "server-room/:id/view",
             element: <ServerViewPage />,
           },
