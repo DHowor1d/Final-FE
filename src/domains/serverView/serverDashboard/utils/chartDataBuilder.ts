@@ -114,6 +114,22 @@ const createSeries = ({
   }),
 });
 
+// 빈 차트 데이터 결과
+const EMPTY_CHART_DATA: ChartDataResult = {
+  timeLabels: [],
+  networkTimeLabels: [],
+  cpuUsage: 0,
+  memoryUsage: 0,
+  diskUsage: 0,
+  cpuModes: [],
+  loadAverage: [],
+  memorySwap: [],
+  networkBandwidth: [],
+  cpuOverhead: [],
+  diskIO: [],
+  inodeUsage: [],
+};
+
 // CPU 모드 series 생성
 const buildCpuModes = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
@@ -257,20 +273,7 @@ export const buildChartData = ({
   networkHistory,
 }: ChartDataState): ChartDataResult => {
   if (systemHistory.length === 0) {
-    return {
-      timeLabels: [],
-      networkTimeLabels: [],
-      cpuUsage: 0,
-      memoryUsage: 0,
-      diskUsage: 0,
-      cpuModes: [],
-      loadAverage: [],
-      memorySwap: [],
-      networkBandwidth: [],
-      cpuOverhead: [],
-      diskIO: [],
-      inodeUsage: [],
-    };
+    return EMPTY_CHART_DATA;
   }
 
   // 최근 MAX_POINTS개 데이터만 사용
@@ -305,9 +308,7 @@ export const buildChartData = ({
     cpuModes: buildCpuModes(recentSystemHistory),
     loadAverage: buildLoadAverage(recentSystemHistory),
     memorySwap: buildMemorySwap(recentSystemHistory),
-    networkBandwidth: buildNetworkBandwidth(
-      aggregatedNetwork as AggregatedNetwork
-    ),
+    networkBandwidth: buildNetworkBandwidth(aggregatedNetwork),
     cpuOverhead: buildCpuOverhead(recentSystemHistory),
     diskIO: buildDiskIO(recentDiskHistory),
     inodeUsage: buildInodeUsage(recentDiskHistory),
