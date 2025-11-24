@@ -4,6 +4,7 @@ import {
   aggregateNetworkByTime,
 } from "../utils/monitoring";
 import { CHART_CONFIG } from "../constants";
+import type { NetworkMonitoringData } from "../types";
 
 interface ChartSeries {
   name: string;
@@ -17,20 +18,54 @@ interface ChartSeries {
 interface SystemData {
   cpuIdle: number;
   usedMemoryPercentage: number;
-  [key: string]: any;
+  cpuUser?: number;
+  cpuSystem?: number;
+  cpuWait?: number;
+  cpuIrq?: number;
+  cpuSoftirq?: number;
+  loadAvg1?: number;
+  loadAvg5?: number;
+  loadAvg15?: number;
+  usedSwapPercentage?: number;
+  cpuSteal?: number;
 }
 
 interface DiskData {
   usedPercentage: number;
-  [key: string]: any;
+  usedInodePercentage?: number;
+}
+
+interface HistoryRecord {
+  cpuUser: number;
+  cpuSystem: number;
+  cpuWait: number;
+  cpuIrq: number;
+  cpuSoftirq: number;
+  loadAvg1: number;
+  loadAvg5: number;
+  loadAvg15: number;
+  usedMemoryPercentage: number;
+  usedSwapPercentage: number;
+  cpuSteal: number;
+  usedPercentage: number;
+  usedInodePercentage: number;
+  ioReadBps: number;
+  ioWriteBps: number;
+  generateTime: string;
+}
+
+interface AggregatedNetwork {
+  rx: number[];
+  tx: number[];
+  timeLabels: string[];
 }
 
 interface ChartDataState {
   systemData: SystemData | null;
   diskData: DiskData | null;
-  systemHistory: any[];
-  diskHistory: any[];
-  networkHistory: any[];
+  systemHistory: HistoryRecord[];
+  diskHistory: HistoryRecord[];
+  networkHistory: NetworkMonitoringData[][];
 }
 
 interface ChartDataResult {
@@ -79,7 +114,7 @@ const createSeries = ({
 });
 
 // CPU 모드 series 생성
-const buildCpuModes = (history: any[]): ChartSeries[] => [
+const buildCpuModes = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "User",
     data: history.map((d) => d.cpuUser),
@@ -108,7 +143,7 @@ const buildCpuModes = (history: any[]): ChartSeries[] => [
 ];
 
 // Load Average series 생성
-const buildLoadAverage = (history: any[]): ChartSeries[] => [
+const buildLoadAverage = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "1분 평균",
     data: history.map((d) => d.loadAvg1),
@@ -127,7 +162,7 @@ const buildLoadAverage = (history: any[]): ChartSeries[] => [
 ];
 
 // Memory & Swap series 생성
-const buildMemorySwap = (history: any[]): ChartSeries[] => [
+const buildMemorySwap = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "메모리",
     data: history.map((d) => d.usedMemoryPercentage),
@@ -143,7 +178,9 @@ const buildMemorySwap = (history: any[]): ChartSeries[] => [
 ];
 
 // Network Bandwidth series 생성
-const buildNetworkBandwidth = (aggregated: any): ChartSeries[] => [
+const buildNetworkBandwidth = (
+  aggregated: AggregatedNetwork
+): ChartSeries[] => [
   createSeries({
     name: "수신 (RX)",
     data: aggregated.rx.map((bytes: number) => bytesToMbps(bytes)),
@@ -157,7 +194,7 @@ const buildNetworkBandwidth = (aggregated: any): ChartSeries[] => [
 ];
 
 // CPU Overhead series 생성
-const buildCpuOverhead = (history: any[]): ChartSeries[] => [
+const buildCpuOverhead = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "I/O Wait (%)",
     data: history.map((d) => d.cpuWait),
@@ -177,7 +214,7 @@ const buildCpuOverhead = (history: any[]): ChartSeries[] => [
 ];
 
 // Disk I/O series 생성
-const buildDiskIO = (history: any[]): ChartSeries[] => [
+const buildDiskIO = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "읽기",
     data: history.map((d) => bytesToMbps(d.ioReadBps)),
@@ -191,7 +228,7 @@ const buildDiskIO = (history: any[]): ChartSeries[] => [
 ];
 
 // Inode Usage series 생성
-const buildInodeUsage = (history: any[]): ChartSeries[] => [
+const buildInodeUsage = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "Disk 사용률",
     data: history.map((d) => d.usedPercentage),
@@ -259,7 +296,9 @@ export const buildChartData = ({
     cpuModes: buildCpuModes(recentSystemHistory),
     loadAverage: buildLoadAverage(recentSystemHistory),
     memorySwap: buildMemorySwap(recentSystemHistory),
-    networkBandwidth: buildNetworkBandwidth(aggregatedNetwork),
+    networkBandwidth: buildNetworkBandwidth(
+      aggregatedNetwork as AggregatedNetwork
+    ),
     cpuOverhead: buildCpuOverhead(recentSystemHistory),
     diskIO: buildDiskIO(recentDiskHistory),
     inodeUsage: buildInodeUsage(recentDiskHistory),
