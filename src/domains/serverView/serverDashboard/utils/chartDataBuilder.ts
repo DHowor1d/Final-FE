@@ -50,29 +50,6 @@ interface ChartDataResult {
 
 const { MAX_POINTS, COLORS } = CHART_CONFIG;
 
-// 데이터 배열을 MAX_POINTS 크기로 채우기
-const fillData = (
-  data: number[],
-  targetLength: number = MAX_POINTS
-): number[] => {
-  const filled = [...data];
-  const emptyCount = targetLength - data.length;
-  for (let i = 0; i < emptyCount; i++) {
-    filled.push(0);
-  }
-  return filled;
-};
-
-// 시간 레이블 채우기
-const fillTimeLabels = (labels: string[]): string[] => {
-  const filled = [...labels];
-  const emptyCount = MAX_POINTS - labels.length;
-  for (let i = 0; i < emptyCount; i++) {
-    filled.push("");
-  }
-  return filled;
-};
-
 // 공통 series 생성 헬퍼
 interface CreateSeriesOptions {
   name: string;
@@ -92,7 +69,7 @@ const createSeries = ({
   averageColor,
 }: CreateSeriesOptions): ChartSeries => ({
   name,
-  data: fillData(data),
+  data: data,
   color,
   ...(showAverage && {
     showAverage,
@@ -263,9 +240,7 @@ export const buildChartData = ({
   const recentDiskHistory = diskHistory.slice(-MAX_POINTS);
 
   // 시간 레이블 생성
-  const timeLabels = fillTimeLabels(
-    generateTimeLabels(recentSystemHistory, MAX_POINTS)
-  );
+  const timeLabels = generateTimeLabels(recentSystemHistory, MAX_POINTS);
 
   // 네트워크 데이터 집계
   const flatNetworkHistory = networkHistory.flat();
@@ -273,7 +248,7 @@ export const buildChartData = ({
     flatNetworkHistory,
     MAX_POINTS
   );
-  const networkTimeLabels = fillTimeLabels(aggregatedNetwork.timeLabels);
+  const networkTimeLabels = aggregatedNetwork.timeLabels;
 
   return {
     timeLabels,
