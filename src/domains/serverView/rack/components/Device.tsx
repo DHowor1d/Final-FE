@@ -10,6 +10,14 @@ import deleteIcon from "../assets/delete.svg";
 import checkIcon from "../assets/check.svg";
 import ClickableIcon from "./ClickableIcon";
 
+interface SystemData {
+  cpu: number;
+  memory: number;
+  disk: number;
+}
+
+type AlertStatus = "normal" | "warning" | "critical";
+
 interface DeviceProps {
   device: Equipments;
   y: number;
@@ -28,6 +36,8 @@ interface DeviceProps {
   onDeviceNameChange?: (deviceId: number, name: string) => void;
   onDeviceNameConfirm?: (device: Equipments, inputName?: string) => void;
   onDeviceNameCancel?: (deviceId: number) => void;
+  alertStatus?: AlertStatus;
+  currentSystemData?: SystemData | null;
 }
 
 function Device({
@@ -48,6 +58,8 @@ function Device({
   onDeviceNameChange,
   onDeviceNameCancel,
   onDeviceNameConfirm,
+  alertStatus = "normal",
+  currentSystemData,
 }: DeviceProps) {
   const [dragging, setIsDragging] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
@@ -65,6 +77,28 @@ function Device({
 
   const deleteImage = useImageLoad(deleteIcon);
   const checkImage = useImageLoad(checkIcon);
+
+  // 임계치 상태에 따른 색상 결정
+  const getAlertColor = () => {
+    switch (alertStatus) {
+      case "critical":
+        return "#ef4444"; // red-500
+      case "warning":
+        return "#f59e0b"; // amber-500
+      default:
+        return "transparent";
+    }
+  };
+
+  const getAlertOpacity = () => {
+    switch (alertStatus) {
+      case "critical":
+      case "warning":
+        return 0.25;
+      default:
+        return 0;
+    }
+  };
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -94,6 +128,9 @@ function Device({
     }
   };
 
+  const alertColor = getAlertColor();
+  const alertOpacity = getAlertOpacity();
+
   return (
     <Group
       y={y}
@@ -116,13 +153,27 @@ function Device({
         <Image image={image} x={x} y={0} width={rackWidth} height={height} />
       )}
 
+      {/* 임계치 경고 배경 (반투명 오버레이) */}
+      {alertStatus !== "normal" && (
+        <Rect
+          x={x}
+          y={0}
+          width={rackWidth}
+          height={height}
+          fill={alertColor}
+          opacity={alertOpacity}
+        />
+      )}
+
       {/* 장비 본체 */}
       <Rect
         x={x}
+        y={0}
         width={rackWidth}
         height={height}
         fill="transparent"
-        strokeWidth={isFloating ? 2 : 1}
+        stroke={alertColor}
+        strokeWidth={alertStatus !== "normal" ? 2 : 1}
       />
 
       {/* 상단 테두리 */}
@@ -130,6 +181,17 @@ function Device({
 
       {/* 하단 테두리 */}
       <Line points={[x, height, x + rackWidth, height]} strokeWidth={2} />
+
+      {/* 메트릭 정보 표시 (선택적) */}
+      {currentSystemData && alertStatus !== "normal" && !isEditing && (
+        <Text
+          x={x + 10}
+          y={height / 2 + 8}
+          text={`CPU:${currentSystemData.cpu}% MEM:${currentSystemData.memory}%`}
+          fontSize={9}
+          fill={alertColor}
+        />
+      )}
 
       {/* 장비 이름 또는 입력 필드 */}
       {isEditing ? (
