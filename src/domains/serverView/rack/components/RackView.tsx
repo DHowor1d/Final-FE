@@ -159,20 +159,20 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
               <RackHeader rackName={displayRackName} />
             </div>
 
-            {!view && (
-              <div className="flex items-center gap-4 ml-4">
+            <div className="flex items-center gap-4 ml-4">
+              {!view && (
                 <Button
                   label={editMode ? "보기" : "편집"}
                   onClick={() => setEditMode(!editMode)}
                   active={editMode}
                 />
-                <Button
-                  label={frontView ? "뒷면" : "앞면"}
-                  onClick={() => setFrontView(!frontView)}
-                  active={frontView}
-                />
-              </div>
-            )}
+              )}
+              <Button
+                label={frontView ? "뒷면" : "앞면"}
+                onClick={() => setFrontView(!frontView)}
+                active={frontView}
+              />
+            </div>
           </header>
 
           <div className="flex flex-1 min-h-0 overflow-visible">
