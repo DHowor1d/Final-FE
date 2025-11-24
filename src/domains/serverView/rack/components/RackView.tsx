@@ -5,11 +5,9 @@ import RackHeader from "./RackHeader";
 import Button from "./Button";
 import { useState, useEffect, useMemo } from "react";
 import ServerDashboard from "@domains/serverView/serverDashboard/components/ServerDashboard";
-import type {
-  SystemMonitoringData,
-  DiskMonitoringData,
-} from "../../serverDashboard/types";
 import { useMonitoringStore } from "../../serverDashboard/stores/monitoringStore";
+import { useEquipmentSSE } from "../../serverDashboard/hooks/useEquipmentSSE";
+import { useAllEquipmentBackgroundSSE } from "../../serverDashboard/hooks/useAllEquipmentBackgroundSSE";
 
 interface RackViewProps {
   onClose?: () => void;
@@ -17,44 +15,16 @@ interface RackViewProps {
   serverRoomId: number;
 }
 
-interface SimpleMetrics {
-  cpu: number;
-  memory: number;
-  disk: number;
-}
-
-const extractMetricsFromSystemData = (
-  systemData: SystemMonitoringData | null,
-  diskData: DiskMonitoringData | null
-): SimpleMetrics | null => {
-  if (!systemData) return null;
-
-  const cpu = Math.max(0, 100 - systemData.cpuIdle);
-  const memory = systemData.usedMemoryPercentage || 0;
-  const disk = diskData?.usedPercentage || 0;
-
-  return {
-    cpu: Number(cpu.toFixed(1)),
-    memory: Number(memory.toFixed(1)),
-    disk: Number(disk.toFixed(1)),
-  };
-};
-
 function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
   const [frontView, setFrontView] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  // 대시보드 상태 추가
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<{
     id: number;
     name: string;
   } | null>(null);
 
-  const [allDeviceMetrics, setAllDeviceMetrics] = useState<
-    Map<number, SimpleMetrics>
-  >(new Map());
-
-  const { systemData, diskData } = useMonitoringStore();
+  const { deviceMetricsMap, setSelectedDeviceId } = useMonitoringStore();
 
   const rackId = useMemo(() => {
     if (!rackName) return undefined;
@@ -74,18 +44,37 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     [rackManager.equipments, selectedDevice?.id]
   );
 
-  useEffect(() => {
-    if (systemData && selectedDevice) {
-      const metrics = extractMetricsFromSystemData(systemData, diskData);
-      if (metrics) {
-        setAllDeviceMetrics((prevMap) => {
-          const newMap = new Map(prevMap);
-          newMap.set(selectedDevice.id, metrics);
-          return newMap;
-        });
-      }
+  const selectableEquipmentIds = useMemo(
+    () =>
+      rackManager.equipments
+        ?.filter(
+          (eq) =>
+            eq.equipmentType === "SERVER" || eq.equipmentType === "STORAGE"
+        )
+        .map((eq) => eq.id) || [],
+    [rackManager.equipments]
+  );
+
+  const backgroundSSEEquipmentIds = useMemo(() => {
+    const shouldStart =
+      !rackManager.isLoading && selectableEquipmentIds.length > 0;
+
+    if (shouldStart) {
+      return selectableEquipmentIds;
     }
-  }, [systemData, diskData, selectedDevice]);
+    return [];
+  }, [rackManager.isLoading, selectableEquipmentIds]);
+
+  useAllEquipmentBackgroundSSE(backgroundSSEEquipmentIds);
+
+  useEquipmentSSE(
+    selectedDevice?.id || 0,
+    dashboardOpen && selectedDevice?.id !== 0
+  );
+
+  useEffect(() => {
+    setSelectedDeviceId(selectedDevice?.id || null);
+  }, [selectedDevice?.id, setSelectedDeviceId]);
 
   useEffect(() => {
     if (editMode) {
@@ -107,12 +96,10 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     }
   };
 
-  //대시보드 닫기 핸들러
   const handleDashboardClose = () => {
     setDashboardOpen(false);
   };
 
-  // 사이드바(대시보드 영역) 클릭 핸들러
   const handleSidebarClick = () => {
     if (dashboardOpen) {
       handleDashboardClose();
@@ -129,7 +116,6 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     );
   }
 
-  // 에러 발생
   if (rackManager.error) {
     return (
       <div className="h-full flex justify-center items-center text-white">
@@ -142,7 +128,6 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
 
   return (
     <div className="h-full flex text-white gap-2 p-2">
-      {/* 왼쪽: 대시보드 영역 - 항상 2 비율 유지 */}
       <div
         className="flex-[2] overflow-hidden relative"
         onClick={handleSidebarClick}
@@ -157,6 +142,7 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
           currentEquipment={selectedEquipment}
         />
       </div>
+
       <div className="flex-1 overflow-visible relative">
         <div className="h-full flex flex-col bg-[#404452]/70 backdrop-blur-md border border-slate-300/40 rounded-xl">
           <header className="flex justify-between items-center px-6 py-4 border-b border-slate-300/40 flex-shrink-0">
@@ -178,7 +164,6 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
             </div>
           </header>
 
-          {/* 메인 컨텐츠 영역 */}
           <div className="flex flex-1 min-h-0 overflow-visible">
             <Sidebar
               onCardClick={rackManager.handleCardClick}
@@ -205,7 +190,7 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
                   onDeviceNameCancel={rackManager.handleDeviceNameCancel}
                   rackId={rackId || 0}
                   serverRoomId={serverRoomId}
-                  allDeviceMetrics={allDeviceMetrics}
+                  allDeviceMetrics={deviceMetricsMap}
                 />
               </div>
             </div>

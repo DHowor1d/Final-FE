@@ -13,13 +13,12 @@ export const useEquipmentSSE = (
   enabled: boolean = true
 ) => {
   const { setSystemData, setDiskData, setNetworkData } = useMonitoringStore();
+
   useEffect(() => {
     if (!enabled || !equipmentId) return;
 
     const token = getAccessToken();
-    if (!token) {
-      return;
-    }
+    if (!token) return;
 
     const url = `${BASE_URL}/monitoring/subscribe/equipment/${equipmentId}`;
 
