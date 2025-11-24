@@ -1,14 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import { getAccessToken, BASE_URL } from "@/api/client";
 import type { DiskMonitoringData, SystemMonitoringData } from "../types";
-import {
-  useMonitoringStore,
-  type SimpleMetrics,
-} from "../stores/monitoringStore";
 
 interface SSEEvent extends Event {
   data: string;
+}
+
+export interface SimpleMetrics {
+  cpu: number;
+  memory: number;
+  disk: number;
+}
+
+interface BackgroundSSECallbacks {
+  onMetricsUpdate: (equipmentId: number, metrics: SimpleMetrics) => void;
+  onConnectionError?: (equipmentId: number, error: Event) => void;
 }
 
 const isSystemMonitoringData = (
@@ -21,7 +28,6 @@ const isDiskMonitoringData = (data: unknown): data is DiskMonitoringData => {
   return typeof data === "object" && data !== null && "usedPercentage" in data;
 };
 
-// 메트릭 추출 함수
 const extractMetricsFromSystemData = (
   systemData: SystemMonitoringData | null,
   diskData: DiskMonitoringData | null
@@ -39,15 +45,18 @@ const extractMetricsFromSystemData = (
   };
 };
 
-// 여러 장비의 백그라운드 메트릭을 동시에 수집합니다
-
-export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
-  const setDeviceMetrics = useMonitoringStore(
-    (state) => state.setDeviceMetrics
-  );
+export const useAllEquipmentBackgroundSSE = (
+  equipmentIds: number[],
+  callbacks: BackgroundSSECallbacks
+) => {
+  // ✅ useRef로 콜백 참조 유지 (매번 새로 생성되어도 dependency에 영향 없음)
+  const callbacksRef = useRef(callbacks);
 
   useEffect(() => {
-    // equipmentIds가 없으면 리턴
+    callbacksRef.current = callbacks;
+  }, [callbacks]);
+
+  useEffect(() => {
     if (!equipmentIds || equipmentIds.length === 0) {
       return;
     }
@@ -57,7 +66,6 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
       return;
     }
 
-    // 각 장비별 SSE 연결 저장
     const eventSourceMap = new Map<number, EventSource>();
 
     const connectToEquipment = (equipmentId: number) => {
@@ -65,6 +73,9 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
         const url = `${BASE_URL}/monitoring/subscribe/equipment/${equipmentId}`;
 
         let latestSystemData: SystemMonitoringData | null = null;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 5;
+        const RECONNECT_DELAY = 3000;
 
         const eventSource = new EventSourcePolyfill(url, {
           headers: {
@@ -81,9 +92,17 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
 
             if (isSystemMonitoringData(parsedData)) {
               latestSystemData = parsedData;
+            } else {
+              console.warn(
+                `[Equipment ${equipmentId}] Invalid system data:`,
+                parsedData
+              );
             }
           } catch (error) {
-            console.error(error);
+            console.error(
+              `[Equipment ${equipmentId}] System data parse error:`,
+              error
+            );
           }
         });
 
@@ -99,7 +118,7 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
                 parsedData
               );
               if (metrics) {
-                setDeviceMetrics(equipmentId, metrics);
+                callbacksRef.current.onMetricsUpdate(equipmentId, metrics);
               }
             } else {
               console.warn(
@@ -115,19 +134,33 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
           }
         });
 
-        eventSource.onerror = (error) => {
+        eventSource.onerror = (error: Event) => {
           console.error(
             `[Equipment ${equipmentId}] SSE connection error:`,
             error
           );
           eventSource.close();
           eventSourceMap.delete(equipmentId);
+          callbacksRef.current.onConnectionError?.(equipmentId, error);
 
-          setTimeout(() => {
-            if (equipmentIds.includes(equipmentId)) {
-              connectToEquipment(equipmentId);
-            }
-          }, 3000);
+          // 지수 백오프로 재연결
+          if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            reconnectAttempts++;
+            const delay = RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1);
+
+            setTimeout(() => {
+              if (equipmentIds.includes(equipmentId)) {
+                console.log(
+                  `[Equipment ${equipmentId}] Reconnecting... (attempt ${reconnectAttempts})`
+                );
+                connectToEquipment(equipmentId);
+              }
+            }, delay);
+          } else {
+            console.error(
+              `[Equipment ${equipmentId}] Max reconnection attempts reached`
+            );
+          }
         };
 
         eventSourceMap.set(equipmentId, eventSource);
@@ -152,5 +185,6 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
       });
       eventSourceMap.clear();
     };
-  }, [equipmentIds, setDeviceMetrics]);
+    // ✅ equipmentIds만 dependency에 포함 (callbacks은 제외)
+  }, [equipmentIds]);
 };
