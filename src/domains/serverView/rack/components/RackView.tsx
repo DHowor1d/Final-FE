@@ -96,8 +96,15 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
   const displayRackName = rackManager.rack?.rackName || rackName || "N/A";
 
   const handleDeviceClick = (deviceId: number, deviceName: string) => {
-    setSelectedDevice({ id: deviceId, name: deviceName });
-    setDashboardOpen(true);
+    const equipment = rackManager.equipments?.find((eq) => eq.id === deviceId);
+    if (
+      equipment &&
+      (equipment.equipmentType === "SERVER" ||
+        equipment.equipmentType === "STORAGE")
+    ) {
+      setSelectedDevice({ id: deviceId, name: deviceName });
+      setDashboardOpen(true);
+    }
   };
 
   //대시보드 닫기 핸들러
