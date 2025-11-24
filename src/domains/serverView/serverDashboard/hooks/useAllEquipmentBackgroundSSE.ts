@@ -65,7 +65,6 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
         const url = `${BASE_URL}/monitoring/subscribe/equipment/${equipmentId}`;
 
         let latestSystemData: SystemMonitoringData | null = null;
-        let dataReceivedCount = 0;
 
         const eventSource = new EventSourcePolyfill(url, {
           headers: {
@@ -82,7 +81,6 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
 
             if (isSystemMonitoringData(parsedData)) {
               latestSystemData = parsedData;
-              dataReceivedCount++;
             }
           } catch (error) {
             console.error(error);
