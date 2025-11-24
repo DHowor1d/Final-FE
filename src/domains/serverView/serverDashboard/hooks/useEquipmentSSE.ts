@@ -34,11 +34,37 @@ const isNetworkMonitoringDataArray = (
   );
 };
 
+const createEventHandler = <T>(
+  typeGuard: (data: unknown) => data is T,
+  setter: (data: T) => void,
+  eventName: string
+) => {
+  return (event: Event) => {
+    try {
+      const sseEvent = event as SSEEvent;
+      const parsedData: unknown = JSON.parse(sseEvent.data);
+
+      if (typeGuard(parsedData)) {
+        setter(parsedData);
+      } else {
+        console.warn(
+          `Invalid ${eventName} monitoring data format:`,
+          parsedData
+        );
+      }
+    } catch (error) {
+      console.error(`${eventName} data parse error:`, error);
+    }
+  };
+};
+
 export const useEquipmentSSE = (
   equipmentId: number,
   enabled: boolean = true
 ) => {
-  const { setSystemData, setDiskData, setNetworkData } = useMonitoringStore();
+  const setSystemData = useMonitoringStore((state) => state.setSystemData);
+  const setDiskData = useMonitoringStore((state) => state.setDiskData);
+  const setNetworkData = useMonitoringStore((state) => state.setNetworkData);
 
   useEffect(() => {
     if (!enabled || !equipmentId) return;
@@ -61,50 +87,24 @@ export const useEquipmentSSE = (
         withCredentials: true,
       }) as EventSource;
 
-      eventSource.addEventListener("system", (event: Event) => {
-        try {
-          const sseEvent = event as SSEEvent;
-          const parsedData: unknown = JSON.parse(sseEvent.data);
+      eventSource.addEventListener(
+        "system",
+        createEventHandler(isSystemMonitoringData, setSystemData, "system")
+      );
 
-          if (isSystemMonitoringData(parsedData)) {
-            setSystemData(parsedData);
-          } else {
-            console.warn("Invalid system monitoring data format:", parsedData);
-          }
-        } catch (error) {
-          console.error("System data parse error:", error);
-        }
-      });
+      eventSource.addEventListener(
+        "disk",
+        createEventHandler(isDiskMonitoringData, setDiskData, "disk")
+      );
 
-      eventSource.addEventListener("disk", (event: Event) => {
-        try {
-          const sseEvent = event as SSEEvent;
-          const parsedData: unknown = JSON.parse(sseEvent.data);
-
-          if (isDiskMonitoringData(parsedData)) {
-            setDiskData(parsedData);
-          } else {
-            console.warn("Invalid disk monitoring data format:", parsedData);
-          }
-        } catch (error) {
-          console.error("Disk data parse error:", error);
-        }
-      });
-
-      eventSource.addEventListener("network", (event: Event) => {
-        try {
-          const sseEvent = event as SSEEvent;
-          const parsedData: unknown = JSON.parse(sseEvent.data);
-
-          if (isNetworkMonitoringDataArray(parsedData)) {
-            setNetworkData(parsedData);
-          } else {
-            console.warn("Invalid network monitoring data format:", parsedData);
-          }
-        } catch (error) {
-          console.error("Network data parse error:", error);
-        }
-      });
+      eventSource.addEventListener(
+        "network",
+        createEventHandler(
+          isNetworkMonitoringDataArray,
+          setNetworkData,
+          "network"
+        )
+      );
 
       eventSource.onerror = (error: Event) => {
         console.error("SSE Error:", error);
