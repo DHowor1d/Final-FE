@@ -16,6 +16,7 @@ export interface Device {
   status: string;
   rackName: string | null;
   rackId: number | null;
+  equipmentCount: number;
 }
 
 // 서버실 정보
@@ -47,6 +48,7 @@ export interface Rack {
   gridZ: number;
   rotation: number;
   status: string;
+  equipmentCount: number; // 랙 내 장비 개수
   equipments: []; // 빈 배열로 초기화 (필요시 추가 API로 장비 정보 로드)
 }
 
@@ -121,6 +123,7 @@ export const getServerRoomRacks = async (
   const { devices } = await getServerRoomDevices(serverRoomId);
   
   // deviceType이 "server"인 것만 필터링하여 Rack으로 변환
+  // API 응답에 이미 equipmentCount가 포함되어 있음
   return devices
     .filter((device) => device.deviceType === "server")
     .map((device) => ({
@@ -133,6 +136,7 @@ export const getServerRoomRacks = async (
       gridZ: device.gridZ,
       rotation: device.rotation,
       status: device.status,
+      equipmentCount: device.equipmentCount, // API 응답의 equipmentCount 사용
       equipments: [], // 빈 배열로 초기화
     }));
 };

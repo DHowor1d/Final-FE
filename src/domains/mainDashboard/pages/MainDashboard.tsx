@@ -4,8 +4,10 @@ import Breadcrumb from '../components/Breadcrumb';
 import DatacenterDashboard from '../components/DatacenterDashboard';
 import ServerRoomDashboard from '../components/ServerRoomDashboard';
 import RackDashboard from '../components/RackDashboard';
+import DashboardEmptyFallback from '../components/DashboardEmptyFallback';
 import { useDashboardData } from '../hooks/useDashboardData';
 import type { SelectedNode } from '../types/dashboard.types';
+import { ErrorBoundary } from '@shared/error';
 
 function MainDashboard() {
   const COMPANY_ID = 1; // TODO: 실제 로그인 회사 ID로 교체
@@ -105,7 +107,16 @@ function MainDashboard() {
           <>
             <Breadcrumb selectedNode={selectedNode} datacenters={datacenters} />
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <div className="p-6">{renderDashboard()}</div>
+              <div className="p-6 h-full">
+                <ErrorBoundary
+                  key={`${selectedNode.level}-${selectedNode.datacenterId}-${selectedNode.serverRoomId || ''}-${selectedNode.rackId || ''}`}
+                  fallback={(error) => (
+                    <DashboardEmptyFallback error={error} />
+                  )}
+                >
+                  {renderDashboard()}
+                </ErrorBoundary>
+              </div>
             </div>
           </>
         )}

@@ -45,6 +45,9 @@ export const useRackSSE = (
   const [temperatureHumidityHistory, setTemperatureHumidityHistory] = useState<TemperatureHumidityData[]>([]);
 
   const sseConnectionRef = useRef<SSEConnection | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const hasReceivedDataRef = useRef(false);
+  const connectionStartTimeRef = useRef<number>(0);
 
   // SSE 메시지 처리
   const handleMessage = useCallback((data: RackMetrics) => {
@@ -52,6 +55,14 @@ export const useRackSSE = (
     if (!data || !data.cpuStats || !data.networkStats || !data.environment) {
       console.warn('Incomplete SSE data received:', data);
       return;
+    }
+
+    hasReceivedDataRef.current = true;
+    
+    // 타임아웃 타이머 취소 (데이터를 받았으므로)
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
 
     setMetrics(data);
@@ -109,9 +120,16 @@ export const useRackSSE = (
         sseConnectionRef.current.close();
         sseConnectionRef.current = null;
       }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setIsConnected(false);
       return;
     }
+
+    // 데이터 수신 플래그 리셋
+    hasReceivedDataRef.current = false;
 
     // SSE 연결 생성
     sseConnectionRef.current = createRackSSE(rackId, {
@@ -125,6 +143,20 @@ export const useRackSSE = (
         console.log(`Connected to rack ${rackId} SSE`);
         setIsConnected(true);
         setError(null);
+        
+        // 연결 시작 시간 기록
+        connectionStartTimeRef.current = Date.now();
+        
+        // SSE 연결 성공 후 5초 타임아웃 설정 (절대 시간 기반)
+        timeoutRef.current = setTimeout(() => {
+          const elapsed = Date.now() - connectionStartTimeRef.current;
+          console.log(`Timeout check: elapsed=${elapsed}ms, hasData=${hasReceivedDataRef.current}`);
+          
+          if (!hasReceivedDataRef.current) {
+            console.warn('랙에 배치된 장비가 없거나 데이터를 받을 수 없습니다.');
+            setError('랙에 배치된 장비가 없거나 데이터를 받을 수 없습니다.');
+          }
+        }, 5000);
       },
       reconnectDelay: 3000,
       maxReconnectAttempts: 10,
@@ -135,6 +167,10 @@ export const useRackSSE = (
       if (sseConnectionRef.current) {
         sseConnectionRef.current.close();
         sseConnectionRef.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
       setIsConnected(false);
     };

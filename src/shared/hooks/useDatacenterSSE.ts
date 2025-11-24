@@ -57,6 +57,9 @@ export const useDatacenterSSE = (
   const [temperatureHumidityHistory, setTemperatureHumidityHistory] = useState<TemperatureHumidityData[]>([]);
 
   const sseConnectionRef = useRef<SSEConnection | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const hasReceivedDataRef = useRef(false);
+  const connectionStartTimeRef = useRef<number>(0);
 
   // 시계열 데이터 추가 헬퍼 함수
   const addToHistory = useCallback(<T,>(
@@ -76,6 +79,14 @@ export const useDatacenterSSE = (
   // SSE 메시지 처리
   const handleMessage = useCallback(
     (data: DatacenterMetrics) => {
+      hasReceivedDataRef.current = true;
+      
+      // 타임아웃 타이머 취소 (데이터를 받았으므로)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
       setMetrics(data);
       setError(null);
 
@@ -150,9 +161,16 @@ export const useDatacenterSSE = (
         sseConnectionRef.current.close();
         sseConnectionRef.current = null;
       }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setIsConnected(false);
       return;
     }
+
+    // 데이터 수신 플래그 리셋
+    hasReceivedDataRef.current = false;
 
     // SSE 연결 생성
     sseConnectionRef.current = createDatacenterSSE(datacenterId, {
@@ -166,6 +184,20 @@ export const useDatacenterSSE = (
         console.log(`Connected to datacenter ${datacenterId} SSE`);
         setIsConnected(true);
         setError(null);
+        
+        // 연결 시작 시간 기록
+        connectionStartTimeRef.current = Date.now();
+        
+        // SSE 연결 성공 후 5초 타임아웃 설정 (절대 시간 기반)
+        timeoutRef.current = setTimeout(() => {
+          const elapsed = Date.now() - connectionStartTimeRef.current;
+          console.log(`Timeout check: elapsed=${elapsed}ms, hasData=${hasReceivedDataRef.current}`);
+          
+          if (!hasReceivedDataRef.current) {
+            console.warn('데이터센터에 배치된 장비가 없거나 데이터를 받을 수 없습니다.');
+            setError('데이터센터에 배치된 장비가 없거나 데이터를 받을 수 없습니다.');
+          }
+        }, 5000);
       },
       reconnectDelay: 3000,
       maxReconnectAttempts: 10,
@@ -176,6 +208,10 @@ export const useDatacenterSSE = (
       if (sseConnectionRef.current) {
         sseConnectionRef.current.close();
         sseConnectionRef.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
       setIsConnected(false);
     };
