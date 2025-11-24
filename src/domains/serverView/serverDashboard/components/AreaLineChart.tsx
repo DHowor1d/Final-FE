@@ -112,6 +112,7 @@ function AreaLineChart({
       axisLabel: {
         color: "#fff",
         fontSize: 12,
+        rotate: 45,
         margin: 15,
       },
       splitLine: {
