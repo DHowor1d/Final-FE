@@ -3,10 +3,11 @@ import ReactECharts from "echarts-for-react";
 
 interface SeriesData {
   name: string;
-  data: number[];
+  data: (number | null)[];
   color: string;
   smooth?: boolean;
   showAverage?: boolean;
+  averageColor?: string;
   lineType?: "solid" | "dashed" | "dotted";
 }
 
@@ -65,19 +66,22 @@ function SmoothLineChart({
       },
       bottom: "3%",
     },
+
     grid: {
-      left: "3.6%",
-      right: "3.6%",
+      left: "3%",
+      right: "3%",
       bottom: "30%",
       top: "5%",
       containLabel: false,
     },
+
     xAxis: {
       type: "category",
       data: xAxisData,
       axisLabel: {
         color: "#fff",
         fontSize: 12,
+        rotate: 45,
       },
       axisLine: {
         lineStyle: {
@@ -97,7 +101,14 @@ function SmoothLineChart({
       },
       axisLabel: {
         color: "#fff",
-        formatter: `{value}${yAxisUnit}`,
+        formatter: (value: number) => {
+          if (value >= 10 || value === 0) {
+            return `${Math.round(value)}${yAxisUnit}`;
+          } else {
+            return `${value.toFixed(1)}${yAxisUnit}`;
+          }
+        },
+        margin: 8,
       },
       axisLine: {
         lineStyle: {
@@ -110,42 +121,45 @@ function SmoothLineChart({
         },
       },
     },
-    series: series.map((s) => ({
-      name: s.name,
-      type: "line",
-      data: s.data,
-      smooth: s.smooth !== undefined ? s.smooth : true,
-      itemStyle: {
-        color: s.color,
-      },
-      lineStyle: {
-        color: s.color,
-        width: 2,
-        type: s.lineType || "solid",
-      },
-      symbol: "circle",
-      symbolSize: 6,
-      markLine: s.showAverage
-        ? {
-            silent: true,
-            lineStyle: {
-              color: s.color,
-              type: "dashed",
-              width: 1,
-            },
-            label: {
-              color: "#fff",
-              fontSize: 12,
-            },
-            data: [
-              {
-                type: "average",
-                name: "평균",
+    series: series.map((s) => {
+      return {
+        name: s.name,
+        type: "line",
+        data: s.data,
+        smooth: s.smooth !== undefined ? s.smooth : true,
+        itemStyle: {
+          color: s.color,
+        },
+        lineStyle: {
+          color: s.color,
+          width: 2,
+          type: s.lineType || "solid",
+        },
+        symbol: "circle",
+        symbolSize: 6,
+        markLine: s.showAverage
+          ? {
+              silent: true,
+              symbol: ["none", "arrow"],
+              symbolSize: 10,
+              lineStyle: {
+                color: s.averageColor || s.color,
+                type: "dashed",
+                width: 2,
               },
-            ],
-          }
-        : undefined,
-    })),
+              label: {
+                show: false,
+              },
+              data: [
+                {
+                  type: "average",
+                  name: "평균",
+                },
+              ],
+            }
+          : undefined,
+      };
+    }),
   };
 
   if (!mounted) return null;

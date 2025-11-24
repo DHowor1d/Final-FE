@@ -58,13 +58,6 @@ function ThresholdMetricInput({
   };
 
   const saveWarning = () => {
-    console.log(`🔍 ${label} - saveWarning 시작:`, {
-      warningChanged,
-      tempWarning,
-      warningValue,
-      editingWarning,
-    });
-
     if (!warningChanged) {
       setEditingWarning(false);
       return;
@@ -105,7 +98,7 @@ function ThresholdMetricInput({
   };
 
   const handleWarningChange = (val: string) => {
-    setWarningChanged(true); // 변경됨!
+    setWarningChanged(true);
     if (val === "") {
       setTempWarning(null);
     } else {
@@ -117,7 +110,7 @@ function ThresholdMetricInput({
   };
 
   const handleCriticalChange = (val: string) => {
-    setCriticalChanged(true); // 변경됨!
+    setCriticalChanged(true);
     if (val === "") {
       setTempCritical(null);
     } else {
