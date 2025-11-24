@@ -1,7 +1,3 @@
-// ============================================================================
-// useEquipmentSSE.ts - 콜백 패턴 (안정적 버전)
-// ============================================================================
-
 import { useEffect, useRef } from "react";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import { getAccessToken, BASE_URL } from "@/api/client";
@@ -23,7 +19,6 @@ export const useEquipmentSSE = (
   callbacks: SSECallbacks,
   enabled: boolean = true
 ) => {
-  // ✅ useRef로 콜백 참조 유지 (매번 새로 생성되어도 dependency에 영향 없음)
   const callbacksRef = useRef(callbacks);
 
   useEffect(() => {
@@ -96,6 +91,5 @@ export const useEquipmentSSE = (
         error
       );
     }
-    // ✅ equipmentId와 enabled만 dependency에 포함 (callbacks는 제외)
   }, [equipmentId, enabled]);
 };
