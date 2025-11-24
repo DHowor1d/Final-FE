@@ -39,9 +39,8 @@ const extractMetricsFromSystemData = (
   };
 };
 
-/**
- * 여러 장비의 백그라운드 메트릭을 동시에 수집합니다
- */
+// 여러 장비의 백그라운드 메트릭을 동시에 수집합니다
+
 export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
   const setDeviceMetrics = useMonitoringStore(
     (state) => state.setDeviceMetrics
@@ -86,10 +85,7 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
               dataReceivedCount++;
             }
           } catch (error) {
-            console.error(
-              `[Equipment ${equipmentId}] System data parse error:`,
-              error
-            );
+            console.error(error);
           }
         });
 
@@ -106,9 +102,6 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
               );
               if (metrics) {
                 setDeviceMetrics(equipmentId, metrics);
-                console.log(
-                  `[Equipment ${equipmentId}] Metrics updated - CPU: ${metrics.cpu}%, MEM: ${metrics.memory}%, DISK: ${metrics.disk}%`
-                );
               }
             } else {
               console.warn(
@@ -132,10 +125,6 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
           eventSource.close();
           eventSourceMap.delete(equipmentId);
 
-          // 3초 후 재연결 시도
-          console.log(
-            `[Equipment ${equipmentId}] Retrying connection in 3 seconds...`
-          );
           setTimeout(() => {
             if (equipmentIds.includes(equipmentId)) {
               connectToEquipment(equipmentId);
@@ -159,9 +148,6 @@ export const useAllEquipmentBackgroundSSE = (equipmentIds: number[]) => {
 
     // Cleanup
     return () => {
-      console.log(
-        `[useAllEquipmentBackgroundSSE] Cleanup - closing ${eventSourceMap.size} connections`
-      );
       eventSourceMap.forEach((eventSource, equipmentId) => {
         console.log(`[Equipment ${equipmentId}] Closing SSE connection`);
         eventSource.close();

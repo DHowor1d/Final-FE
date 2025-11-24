@@ -28,7 +28,7 @@ interface MonitoringState {
   networkData: NetworkMonitoringData[] | null;
   systemHistory: SystemMonitoringData[];
   diskHistory: DiskMonitoringData[];
-  networkHistory: NetworkMonitoringData[][]; // ✅ 2차원 배열
+  networkHistory: NetworkMonitoringData[][];
 
   // 모든 장비의 최신 메트릭 (임계치 표시용)
   deviceMetricsMap: Map<number, SimpleMetrics>;
@@ -65,7 +65,6 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
   setSelectedDeviceId: (deviceId: number | null) => {
     set({ selectedDeviceId: deviceId });
 
-    // 선택된 장비가 바뀌면 해당 장비의 히스토리 로드
     if (deviceId !== null) {
       get().loadDeviceHistory(deviceId);
     } else {
@@ -140,18 +139,9 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
     set((state) => {
       const selectedDeviceId = state.selectedDeviceId;
 
-      // 2차원 배열: [...state.networkHistory, data]
-      const newNetworkHistory = [
-        ...state.networkHistory,
-        data, // ← data는 배열이므로 그대로 추가 (2차원이 됨)
-      ].slice(-MAX_HISTORY_LENGTH);
-
-      console.log("[Store] setNetworkData called", {
-        dataLength: data.length,
-        newNetworkHistoryLength: newNetworkHistory.length,
-        newNetworkHistoryFirstLength:
-          newNetworkHistory.length > 0 ? newNetworkHistory[0].length : 0,
-      });
+      const newNetworkHistory = [...state.networkHistory, data].slice(
+        -MAX_HISTORY_LENGTH
+      );
 
       if (selectedDeviceId) {
         const deviceHistory = state.deviceHistoryMap.get(selectedDeviceId) || {
