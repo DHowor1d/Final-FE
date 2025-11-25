@@ -97,6 +97,7 @@ export interface Rack {
   gridZ: number;
   rotation: number;
   status: string;
+  equipmentCount: number;
   equipments: Equipment[];
 }
 

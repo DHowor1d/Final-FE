@@ -124,7 +124,7 @@ function NotificationBell() {
 
       {/* 알림 드롭다운 */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-gray-50/20 backdrop-blur-sm rounded-lg shadow-xl border border-slate-300/40 z-1000 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-80 bg-black/40 backdrop-blur-sm rounded-lg shadow-xl border border-slate-300/40 z-1000 overflow-hidden">
 
           <div className="max-h-96 overflow-y-auto">
             {alerts.length === 0 ? (

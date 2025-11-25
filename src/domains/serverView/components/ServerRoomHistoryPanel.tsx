@@ -10,7 +10,7 @@ interface ServerRoomHistoryPanelProps {
 
 function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [history, setHistory] = useState<HistoryRecord[]>([]);
+  const [allHistory, setAllHistory] = useState<HistoryRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -18,7 +18,18 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
   const [selectedEntityType, setSelectedEntityType] = useState<string>("ALL");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 필터 변경 시 리셋
+  // 클라이언트 사이드 필터링
+  const filteredHistory = allHistory.filter((record) => {
+    if (selectedAction !== "ALL" && record.action !== selectedAction) {
+      return false;
+    }
+    if (selectedEntityType !== "ALL" && record.entityType !== selectedEntityType) {
+      return false;
+    }
+    return true;
+  });
+
+  // 패널 열릴 때만 초기 로드
   useEffect(() => {
     if (!isOpen) return;
     
@@ -27,15 +38,11 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
         setIsLoading(true);
         setPage(0);
         
-        const params = {
+        const response = await historyApi.getServerRoomHistory(serverRoomId, {
           page: 0,
           size: 20,
-          ...(selectedAction !== "ALL" && { action: selectedAction }),
-          ...(selectedEntityType !== "ALL" && { entityType: selectedEntityType }),
-        };
-
-        const response = await historyApi.getServerRoomHistory(serverRoomId, params);
-        setHistory(response.result.content);
+        });
+        setAllHistory(response.result.content);
         setHasMore(!response.result.last);
       } catch (error) {
         console.error("Failed to fetch history:", error);
@@ -45,7 +52,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
     };
 
     loadHistory();
-  }, [isOpen, selectedAction, selectedEntityType, serverRoomId]);
+  }, [isOpen, serverRoomId]);
 
   // 페이지 변경 시 추가 로드
   useEffect(() => {
@@ -55,15 +62,11 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
       try {
         setIsLoading(true);
         
-        const params = {
+        const response = await historyApi.getServerRoomHistory(serverRoomId, {
           page,
           size: 20,
-          ...(selectedAction !== "ALL" && { action: selectedAction }),
-          ...(selectedEntityType !== "ALL" && { entityType: selectedEntityType }),
-        };
-
-        const response = await historyApi.getServerRoomHistory(serverRoomId, params);
-        setHistory((prev) => [...prev, ...response.result.content]);
+        });
+        setAllHistory((prev) => [...prev, ...response.result.content]);
         setHasMore(!response.result.last);
       } catch (error) {
         console.error("Failed to fetch history:", error);
@@ -73,7 +76,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
     };
 
     loadMore();
-  }, [page, isOpen, selectedAction, selectedEntityType, serverRoomId]);
+  }, [page, isOpen, serverRoomId]);
 
   // 무한 스크롤
   const handleScroll = () => {
@@ -88,26 +91,26 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
   const getActionIcon = (action: string) => {
     switch (action) {
       case "CREATE":
-        return <BiPlus className="text-green-500" />;
+        return <BiPlus className="text-green-400" />;
       case "DELETE":
-        return <BiMinus className="text-red-500" />;
+        return <BiMinus className="text-red-400" />;
       case "UPDATE":
-        return <BiEdit className="text-blue-500" />;
+        return <BiEdit className="text-cyan-400" />;
       default:
-        return <FiGitCommit className="text-gray-500" />;
+        return <FiGitCommit className="text-gray-400" />;
     }
   };
 
   const getActionColor = (action: string) => {
     switch (action) {
       case "CREATE":
-        return "text-green-500 bg-green-500/10 border-green-500/30";
+        return "text-green-400 bg-green-500/20 border-green-500/40";
       case "DELETE":
-        return "text-red-500 bg-red-500/10 border-red-500/30";
+        return "text-red-400 bg-red-500/20 border-red-500/40";
       case "UPDATE":
-        return "text-blue-500 bg-blue-500/10 border-blue-500/30";
+        return "text-cyan-400 bg-cyan-500/20 border-cyan-500/40";
       default:
-        return "text-gray-500 bg-gray-500/10 border-gray-500/30";
+        return "text-gray-400 bg-gray-500/20 border-gray-500/40";
     }
   };
 
@@ -134,7 +137,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
     return (
       <div className="mt-2 text-xs">
         <span className="text-gray-400">변경된 필드: </span>
-        <span className="text-blue-400">
+        <span className="text-cyan-400">
           {record.changedFields.join(", ")}
         </span>
       </div>
@@ -144,7 +147,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
   const renderValueDiff = (record: HistoryRecord) => {
     if (record.action === "CREATE" && record.afterValue) {
       return (
-        <div className="mt-2 p-2 bg-green-500/5 border border-green-500/20 rounded text-xs">
+        <div className="mt-2 p-2 bg-green-500/10 border border-green-500/30 rounded text-xs">
           <div className="text-green-400 font-semibold mb-1">+ 생성됨</div>
           <pre className="text-gray-300 overflow-x-auto">
             {JSON.stringify(record.afterValue, null, 2)}
@@ -155,7 +158,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
 
     if (record.action === "DELETE" && record.beforeValue) {
       return (
-        <div className="mt-2 p-2 bg-red-500/5 border border-red-500/20 rounded text-xs">
+        <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-xs">
           <div className="text-red-400 font-semibold mb-1">- 삭제됨</div>
           <pre className="text-gray-300 overflow-x-auto">
             {JSON.stringify(record.beforeValue, null, 2)}
@@ -181,9 +184,9 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
           {Object.entries(changedFieldsData).map(([field, values]) => (
             <div
               key={field}
-              className="p-2 bg-blue-500/5 border border-blue-500/20 rounded text-xs"
+              className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded text-xs"
             >
-              <div className="font-semibold text-blue-400 mb-1">{field}</div>
+              <div className="font-semibold text-cyan-400 mb-1">{field}</div>
               <div className="flex items-center gap-2">
                 <span className="text-red-400">
                   {String(values.before ?? "null")}
@@ -215,23 +218,23 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
 
       {/* 히스토리 패널 */}
       {isOpen && (
-        <div className="absolute top-0 right-0 w-96 h-full bg-gray-900/95 backdrop-blur-sm border-l border-gray-700 z-20 flex flex-col shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-full bg-neutral-900/70 backdrop-blur-sm border-l border-neutral-700 z-20 flex flex-col shadow-2xl">
           {/* 헤더 */}
-          <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+          <div className="p-4 border-b border-neutral-700 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MdHistory className="text-2xl text-blue-400" />
-              <h2 className="text-lg font-bold text-white">변경 히스토리</h2>
+              <MdHistory className="text-2xl text-cyan-400" />
+              <h2 className="text-lg font-bold text-gray-100">변경 히스토리</h2>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-gray-800 rounded transition-colors"
+              className="p-1 hover:bg-neutral-800 rounded transition-colors"
             >
               <MdClose className="text-xl text-gray-400" />
             </button>
           </div>
 
           {/* 필터 */}
-          <div className="p-4 border-b border-gray-700 space-y-2">
+          <div className="p-4 border-b border-neutral-700 space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <MdFilterList className="text-gray-400" />
               <span className="text-gray-400">필터</span>
@@ -240,7 +243,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
               <select
                 value={selectedAction}
                 onChange={(e) => setSelectedAction(e.target.value)}
-                className="flex-1 px-3 py-1.5 bg-gray-800 text-white text-sm rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+                className="flex-1 px-3 py-1.5 bg-neutral-800 text-gray-100 text-sm rounded border border-neutral-700 focus:border-cyan-500 focus:outline-none"
               >
                 <option value="ALL">모든 액션</option>
                 <option value="CREATE">생성</option>
@@ -250,12 +253,12 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
               <select
                 value={selectedEntityType}
                 onChange={(e) => setSelectedEntityType(e.target.value)}
-                className="flex-1 px-3 py-1.5 bg-gray-800 text-white text-sm rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+                className="flex-1 px-3 py-1.5 bg-neutral-800 text-gray-100 text-sm rounded border border-neutral-700 focus:border-cyan-500 focus:outline-none"
               >
                 <option value="ALL">모든 타입</option>
-                <option value="EQUIPMENT">장비</option>
+                <option value="DEVICE">장비</option>
                 <option value="RACK">랙</option>
-                <option value="SENSOR">센서</option>
+                <option value="EQUIPMENT">설비</option>
               </select>
             </div>
           </div>
@@ -266,19 +269,19 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
             onScroll={handleScroll}
             className="flex-1 overflow-y-auto p-4 space-y-4"
           >
-            {history.length === 0 && !isLoading ? (
+            {filteredHistory.length === 0 && !isLoading ? (
               <div className="text-center text-gray-500 py-8">
-                히스토리가 없습니다.
+                {allHistory.length === 0 ? "히스토리가 없습니다." : "필터 조건에 맞는 히스토리가 없습니다."}
               </div>
             ) : (
-              history.map((record, index) => (
+              filteredHistory.map((record, index) => (
                 <div
                   key={`${record.id}-${index}`}
                   className="relative pl-6 pb-4"
                 >
                   {/* 타임라인 라인 */}
-                  {index < history.length - 1 && (
-                    <div className="absolute left-2 top-6 bottom-0 w-0.5 bg-gray-700" />
+                  {index < filteredHistory.length - 1 && (
+                    <div className="absolute left-2 top-6 bottom-0 w-0.5 bg-neutral-700" />
                   )}
 
                   {/* 타임라인 아이콘 */}
@@ -291,7 +294,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
                   </div>
 
                   {/* 커밋 내용 */}
-                  <div className="bg-gray-800/50 rounded-lg p-3 hover:bg-gray-800 transition-colors">
+                  <div className="bg-neutral-800/50 rounded-lg p-3 hover:bg-neutral-800/70 transition-colors border border-neutral-700/50">
                     {/* 헤더 */}
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -315,7 +318,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
 
                     {/* 작성자 및 시간 */}
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                      <span className="font-medium text-blue-400">
+                      <span className="font-medium text-cyan-400">
                         {record.changedByName}
                       </span>
                       <span>({record.changedByRole})</span>
@@ -335,7 +338,7 @@ function ServerRoomHistoryPanel({ serverRoomId }: ServerRoomHistoryPanelProps) {
 
             {isLoading && (
               <div className="text-center py-4">
-                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
+                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-cyan-400" />
               </div>
             )}
           </div>

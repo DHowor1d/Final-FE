@@ -42,6 +42,11 @@ export default function RackDashboard({ rackId }: RackDashboardProps) {
     error,
   } = useRackSSE(rackId, true);
 
+  // 에러 발생 시 throw하여 ErrorBoundary가 처리하도록 함
+  if (error) {
+    throw new Error(error);
+  }
+
   // 로딩 상태
   if (!metrics || !metrics.rackSummary) {
     return (
@@ -222,16 +227,48 @@ export default function RackDashboard({ rackId }: RackDashboardProps) {
         <MemoryGauge value={metrics.memoryStats.avgUsage} />
         <DiskGauge value={metrics.diskStats.avgUsage} />
         <NetworkGauge
-          value={(metrics.networkStats.avgRxUsage + metrics.networkStats.avgTxUsage) / 2}
+          value={
+            (metrics.networkStats.avgRxUsage +
+              metrics.networkStats.avgTxUsage) /
+            2
+          }
         />
       </div>
 
-      {/* 장비 타입별 구성 & 네트워크 품질 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* 온습도 추이 & CPU 사용률 추이 */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* 장비 타입별 구성 */}
         <EquipmentTypeChart data={metrics.rackSummary.activeEquipmentTypes} />
+        <div className="col-span-2">
+          <TemperatureHumidityChart
+            data={temperatureHumidityHistory}
+            currentTemp={metrics.environment.temperature}
+            currentHumidity={metrics.environment.humidity}
+            minTemp={metrics.environment.minTemperature}
+            maxTemp={metrics.environment.maxTemperature}
+            minHumidity={metrics.environment.minHumidity}
+            maxHumidity={metrics.environment.maxHumidity}
+            temperatureWarnings={metrics.environment.temperatureWarning ? 1 : 0}
+            humidityWarnings={metrics.environment.humidityWarning ? 1 : 0}
+          />
+        </div>
+        <div className="col-span-2">
+          <CpuUsageChart data={cpuUsageHistory} />
+        </div>
+      </div>
 
-        {/* 네트워크 품질 지표 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* 네트워크 트래픽 추이 */}
+        <NetworkTrafficChart
+          data={{
+            currentRxBytesPerSec:
+              (metrics.networkStats.totalRxMbps * 1000000) / 8,
+            currentTxBytesPerSec:
+              (metrics.networkStats.totalTxMbps * 1000000) / 8,
+            networkUsageTrend: networkTrafficHistory,
+          }}
+        />
+
         <div className="bg-neutral-800 rounded-lg p-4 border border-neutral-700">
           <div className="flex items-center gap-2 mb-4">
             <Network size={20} className="text-blue-400" />
@@ -296,32 +333,6 @@ export default function RackDashboard({ rackId }: RackDashboardProps) {
           </div>
         </div>
       </div>
-
-      {/* 온습도 추이 & CPU 사용률 추이 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <TemperatureHumidityChart
-          data={temperatureHumidityHistory}
-          currentTemp={metrics.environment.temperature}
-          currentHumidity={metrics.environment.humidity}
-          minTemp={metrics.environment.minTemperature}
-          maxTemp={metrics.environment.maxTemperature}
-          minHumidity={metrics.environment.minHumidity}
-          maxHumidity={metrics.environment.maxHumidity}
-          temperatureWarnings={metrics.environment.temperatureWarning ? 1 : 0}
-          humidityWarnings={metrics.environment.humidityWarning ? 1 : 0}
-        />
-        <CpuUsageChart data={cpuUsageHistory} />
-      </div>
-
-      {/* 네트워크 트래픽 추이 */}
-      <NetworkTrafficChart
-        data={{
-          currentRxBytesPerSec: metrics.networkStats.totalRxMbps * 1000000 / 8,
-          currentTxBytesPerSec: metrics.networkStats.totalTxMbps * 1000000 / 8,
-          networkUsageTrend: networkTrafficHistory,
-        }}
-      />
-
       {/* Top 장비 순위 테이블 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* CPU Top 5 */}
@@ -394,4 +405,3 @@ export default function RackDashboard({ rackId }: RackDashboardProps) {
     </div>
   );
 }
-

@@ -3,7 +3,7 @@ import client from "@/api/client";
 export interface HistoryRecord {
   id: number;
   serverRoomId: number;
-  entityType: "EQUIPMENT" | "RACK" | "SENSOR" | "OTHER";
+  entityType: "EQUIPMENT" | "RACK" | "DEVICE";
   entityId: number;
   entityName: string;
   entityCode: string | null;

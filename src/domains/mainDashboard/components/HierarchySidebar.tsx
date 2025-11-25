@@ -170,7 +170,7 @@ export default function HierarchySidebar({
                           <Server size={14} />
                           <span>{rack.name}</span>
                           <span className="ml-auto text-xs text-gray-400">
-                            ({rack.equipments?.length || 0})
+                            ({rack.equipmentCount})
                           </span>
                         </div>
                       }

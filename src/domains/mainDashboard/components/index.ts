@@ -26,3 +26,4 @@ export { default as HierarchySidebar } from './HierarchySidebar';
 export { default as DatacenterDashboard } from './DatacenterDashboard';
 export { default as ServerRoomDashboard } from './ServerRoomDashboard';
 export { default as RackDashboard } from './RackDashboard';
+export { default as DashboardEmptyFallback } from './DashboardEmptyFallback';
