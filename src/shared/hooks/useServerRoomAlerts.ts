@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { createAlertSSE } from '@/api/sseClient';
-import { alertApi, type Alert } from '@/api/alertApi';
+import type { Alert } from '@/api/alertApi';
+import { useAlertStore } from '@/shared/store/useAlertStore';
 
 export interface RackAlert {
   rackId: number;
@@ -8,14 +8,17 @@ export interface RackAlert {
   latestAlert: Alert;
 }
 
+const ALERT_TTL_MS = 5 * 60 * 1000;
+
 /**
  * 서버실 알림을 실시간으로 수신하고 랙별 알림 상태를 관리하는 Hook
  * @param serverRoomId 서버실 ID (없으면 전체 알림 수신)
  */
 export const useServerRoomAlerts = (serverRoomId?: number) => {
   const [rackAlerts, setRackAlerts] = useState<Map<number, RackAlert>>(new Map());
-  const sseConnectionRef = useRef<ReturnType<typeof createAlertSSE> | null>(null);
-  const clearTimersRef = useRef<number[]>([]);
+  const clearTimersRef = useRef<Map<number, number>>(new Map());
+  const processedAlertsRef = useRef<Set<number>>(new Set());
+  const alerts = useAlertStore((state) => state.alerts);
 
   const shouldProcessAlert = useCallback(
     (alert: Alert) => {
@@ -44,6 +47,9 @@ export const useServerRoomAlerts = (serverRoomId?: number) => {
   }, []);
 
   const scheduleAlertCleanup = useCallback((alert: Alert) => {
+    const elapsed = Date.now() - new Date(alert.triggeredAt).getTime();
+    const remaining = Math.max(0, ALERT_TTL_MS - elapsed);
+
     const timeoutId = window.setTimeout(() => {
       setRackAlerts((prev) => {
         const newMap = new Map(prev);
@@ -55,9 +61,15 @@ export const useServerRoomAlerts = (serverRoomId?: number) => {
         }
         return newMap;
       });
-    }, 300000);
+      clearTimersRef.current.delete(alert.alertId);
+      processedAlertsRef.current.delete(alert.alertId);
+    }, remaining);
 
-    clearTimersRef.current.push(timeoutId);
+    const previousTimer = clearTimersRef.current.get(alert.alertId);
+    if (previousTimer) {
+      clearTimeout(previousTimer);
+    }
+    clearTimersRef.current.set(alert.alertId, timeoutId);
   }, []);
 
   const processAlert = useCallback(
@@ -75,59 +87,35 @@ export const useServerRoomAlerts = (serverRoomId?: number) => {
   );
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchInitialAlerts = async () => {
-      try {
-        const response = await alertApi.getAlerts({ page: 0, size: 200, days: 1 });
-        if (!isMounted) return;
-
-        const relevantAlerts = response.content.filter(shouldProcessAlert);
-
-        setRackAlerts((prev) => {
-          let newMap = new Map(prev);
-          relevantAlerts.forEach((alert) => {
-            newMap = upsertAlert(newMap, alert);
-            scheduleAlertCleanup(alert);
-          });
-          return newMap;
-        });
-      } catch (error) {
-        console.error('Failed to fetch initial alerts:', error);
-      }
-    };
-
-    fetchInitialAlerts();
-
-    // SSE 연결 생성
-    const connection = createAlertSSE<Alert>({
-      onMessage: (alert) => {
-        processAlert(alert);
-      },
-      onError: (error) => {
-        console.error('Alert SSE error in useServerRoomAlerts:', error);
-      },
-      onOpen: () => {
-        console.log('Alert SSE connection established in useServerRoomAlerts');
-      },
+    clearTimersRef.current.forEach((timeoutId) => {
+      clearTimeout(timeoutId);
     });
+    clearTimersRef.current.clear();
+    processedAlertsRef.current.clear();
+    setRackAlerts(new Map());
+  }, [serverRoomId]);
 
-    sseConnectionRef.current = connection;
-
-    // 클린업
-    return () => {
-      isMounted = false;
-      if (sseConnectionRef.current) {
-        sseConnectionRef.current.close();
-        sseConnectionRef.current = null;
+  useEffect(() => {
+    alerts.forEach((alert) => {
+      if (!processedAlertsRef.current.has(alert.alertId) && shouldProcessAlert(alert)) {
+        processedAlertsRef.current.add(alert.alertId);
+        processAlert(alert);
       }
+    });
+  }, [alerts, processAlert, serverRoomId, shouldProcessAlert]);
 
-      clearTimersRef.current.forEach((timeoutId) => {
+  useEffect(() => {
+    const timers = clearTimersRef.current;
+    const processed = processedAlertsRef.current;
+
+    return () => {
+      timers.forEach((timeoutId) => {
         clearTimeout(timeoutId);
       });
-      clearTimersRef.current = [];
+      timers.clear();
+      processed.clear();
     };
-  }, [processAlert, scheduleAlertCleanup, shouldProcessAlert, upsertAlert]);
+  }, []);
 
   return { rackAlerts };
 };
