@@ -49,7 +49,6 @@ export const useAllEquipmentBackgroundSSE = (
   equipmentIds: number[],
   callbacks: BackgroundSSECallbacks
 ) => {
-  // ✅ useRef로 콜백 참조 유지 (매번 새로 생성되어도 dependency에 영향 없음)
   const callbacksRef = useRef(callbacks);
 
   useEffect(() => {
@@ -185,6 +184,5 @@ export const useAllEquipmentBackgroundSSE = (
       });
       eventSourceMap.clear();
     };
-    // ✅ equipmentIds만 dependency에 포함 (callbacks은 제외)
   }, [equipmentIds]);
 };
