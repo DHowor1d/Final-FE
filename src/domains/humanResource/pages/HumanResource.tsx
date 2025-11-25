@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
 } from '@tanstack/react-table';
 import type {
   PaginationState,
@@ -14,6 +15,7 @@ import { Plus, Trash2 } from 'lucide-react';
 
 import { DataTable, DataTablePagination } from '@/shared/table';
 import { memberColumns } from '../components/memberTable.config';
+import MemberFilters from '../components/MemberFilters';
 import AddMemberModal from '../components/AddMemberModal';
 import EditMemberModal from '../components/EditMemberModal';
 import DeleteMemberModal from '../components/DeleteMemberModal';
@@ -33,6 +35,7 @@ export default function HumanResource() {
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
@@ -44,6 +47,20 @@ export default function HumanResource() {
   const { data: memberData = [], isLoading, isError } = useGetMemberList();
   const deleteMemberMutation = useDeleteMember();
   const deleteMultipleMembersMutation = useDeleteMultipleMembers();
+
+  // 검색 필터링된 데이터
+  const filteredData = useMemo(() => {
+    if (!searchTerm) return memberData;
+    
+    const lowerSearch = searchTerm.toLowerCase();
+    return memberData.filter((member) => {
+      return (
+        member.name.toLowerCase().includes(lowerSearch) ||
+        member.userName.toLowerCase().includes(lowerSearch) ||
+        member.email.toLowerCase().includes(lowerSearch)
+      );
+    });
+  }, [memberData, searchTerm]);
 
   // --- 이벤트 핸들러 ---
   const handleAddMember = () => {
@@ -100,7 +117,7 @@ export default function HumanResource() {
 
   // --- 테이블 인스턴스 ---
   const table = useReactTable({
-    data: memberData,
+    data: filteredData,
     columns: memberColumns,
     state: { pagination, rowSelection, sorting },
     onPaginationChange: setPagination,
@@ -109,6 +126,7 @@ export default function HumanResource() {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: true,
     meta: {
       onEdit: handleEditMember,
@@ -138,6 +156,12 @@ export default function HumanResource() {
 
       {/* 메인 컨텐츠 */}
       <main className="flex-1 overflow-y-auto p-8">
+        {/* 검색 필터 */}
+        <MemberFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+
         {/* 대량 작업 버튼 */}
         {selectedCount > 0 && (
           <div className="mb-4 flex items-center gap-2">

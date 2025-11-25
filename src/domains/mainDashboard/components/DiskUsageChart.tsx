@@ -30,19 +30,19 @@ export default function DiskUsageChart({ data, height = '300px' }: DiskUsageChar
   const series: LineChartSeries[] = [
     {
       name: '평균 사용량',
-      data: data.map((item) => item.avgUsage.toFixed(2)),
+      data: data.map((item) => (item.avgUsage ?? 0).toFixed(2)),
       showArea: true,
       color: '#22c55e', // 초록색
     },
     {
       name: '최대 사용량',
-      data: data.map((item) => item.maxUsage.toFixed(2)),
+      data: data.map((item) => (item.maxUsage ?? 0).toFixed(2)),
       showArea: true,
       color: '#eab308', // 노란색
     },
     {
       name: '최소 사용량',
-      data: data.map((item) => item.minUsage.toFixed(2)),
+      data: data.map((item) => (item.minUsage ?? 0).toFixed(2)),
       showArea: true,
       color: '#0ea5e9', // 하늘색
     },

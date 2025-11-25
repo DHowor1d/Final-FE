@@ -30,6 +30,11 @@ export default function DatacenterDashboard({
     // reconnect,
   } = useDatacenterSSE(datacenterId, true);
 
+  // 에러 발생 시 throw하여 ErrorBoundary가 처리하도록 함
+  if (error) {
+    throw new Error(error);
+  }
+
   // 로딩 상태
   if (!metrics) {
     return (

@@ -33,7 +33,7 @@ export default function DataTable<TData>({
 
   return (
     <div className="overflow-x-auto bg-gray-700/50 rounded-lg shadow-md border border-slate-300/40">
-      <table className="min-w-full">
+      <table className="min-w-full" style={{ tableLayout: 'fixed' }}>
         {/* 테이블 헤더 */}
         <thead className="bg-gray-600">
           {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>) => (
@@ -41,7 +41,8 @@ export default function DataTable<TData>({
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-slate-300/40"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-slate-300/40 overflow-hidden text-ellipsis"
+                  style={{ width: header.getSize() }}
                 >
                   {header.isPlaceholder
                     ? null
@@ -77,7 +78,8 @@ export default function DataTable<TData>({
                 {row.getVisibleCells().map((cell: Cell<TData, unknown>) => (
                   <td
                     key={cell.id}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-50"
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-50 overflow-hidden text-ellipsis"
+                    style={{ width: cell.column.columnDef.size }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>

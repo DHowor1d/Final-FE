@@ -16,10 +16,7 @@ export interface SSEConnection {
   isConnected: () => boolean;
 }
 
-/**
- * SSE 연결을 생성하고 관리하는 유틸리티 함수
- * EventSource는 헤더를 지원하지 않으므로 fetch로 스트림을 처리
- */
+
 export const createSSEConnection = <T = unknown>(
   endpoint: string,
   options: SSEOptions<T>
@@ -218,4 +215,13 @@ export const createRackSSE = <T = unknown>(
   options: Omit<SSEOptions<T>, "onOpen"> & { onOpen?: () => void }
 ) => {
   return createSSEConnection(`/monitoring/subscribe/rack/${rackId}`, options);
+};
+
+/**
+ * 알림 SSE 연결 생성
+ */
+export const createAlertSSE = <T = unknown>(
+  options: Omit<SSEOptions<T>, "onOpen"> & { onOpen?: () => void }
+) => {
+  return createSSEConnection(`/alerts/subscribe`, options);
 };
