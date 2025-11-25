@@ -28,7 +28,7 @@ export const memberColumns: ColumnDef<Member>[] = [
     cell: ({ row }) => (
       <input
         type="checkbox"
-        className="rounded border-gray-600 bg-gray-700 focus:ring-slate-300/40"
+        className="w-5 h-5 rounded border-gray-600 bg-gray-700 focus:ring-slate-300/40"
         checked={row.getIsSelected()}
         disabled={!row.getCanSelect()}
         onChange={row.getToggleSelectedHandler()}
@@ -36,6 +36,7 @@ export const memberColumns: ColumnDef<Member>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+    size: 50,
   },
   
   // ID
@@ -71,6 +72,7 @@ export const memberColumns: ColumnDef<Member>[] = [
         </button>
       );
     },
+    size: 140,
   },
   
   // 이름
@@ -87,6 +89,7 @@ export const memberColumns: ColumnDef<Member>[] = [
         </button>
       );
     },
+    size: 120,
   },
   
   // 이메일
@@ -96,6 +99,7 @@ export const memberColumns: ColumnDef<Member>[] = [
     cell: ({ getValue }) => {
       return <span>{getValue<string>()}</span>;
     },
+    size: 200,
   },
   
   // 역할
@@ -124,6 +128,7 @@ export const memberColumns: ColumnDef<Member>[] = [
         </span>
       );
     },
+    size: 110,
   },
   
   // 마지막 로그인
@@ -157,6 +162,7 @@ export const memberColumns: ColumnDef<Member>[] = [
         </span>
       );
     },
+    size: 160,
   },
   
   // 관리 액션
@@ -164,7 +170,7 @@ export const memberColumns: ColumnDef<Member>[] = [
     id: 'actions',
     header: '관리',
     cell: ({ row, table }) => (
-      <div className="flex gap-2">
+      <div className="flex gap-2 justify-start">
         <button
           className="text-gray-400 hover:text-blue-400"
           onClick={() =>
@@ -186,5 +192,6 @@ export const memberColumns: ColumnDef<Member>[] = [
       </div>
     ),
     enableSorting: false,
+    size: 80,
   },
 ];

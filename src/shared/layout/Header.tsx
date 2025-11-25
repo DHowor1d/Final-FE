@@ -4,6 +4,7 @@ import { GrResources } from "react-icons/gr";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { MdOutlinePeopleAlt, MdLogout } from "react-icons/md";
 import { useAuthStore } from "@domains/login/store/useAuthStore";
+import NotificationBell from "./NotificationBell";
 
 function Header() {
   const navigate = useNavigate();
@@ -84,6 +85,9 @@ function Header() {
               <span>{user?.name || '사용자'} | {user?.companyName || ''}</span>
             </div>
           </div>
+
+          {/* 알림 버튼 */}
+          <NotificationBell />
 
           {/* 로그아웃 버튼 */}
           <button 

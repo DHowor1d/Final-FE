@@ -9,6 +9,7 @@ interface DataCenterTabsProps {
   onEditDataCenter: (dataCenter: DataCenterGroup) => void;
   onDeleteDataCenter: (dataCenter: DataCenterGroup) => void;
   onCreateDataCenter: () => void;
+  userRole?: string;
 }
 
 export function DataCenterTabs({
@@ -18,6 +19,7 @@ export function DataCenterTabs({
   onEditDataCenter,
   onDeleteDataCenter,
   onCreateDataCenter,
+  userRole,
 }: DataCenterTabsProps) {
   return (
   <div className="datacenter-tabs">
@@ -41,9 +43,11 @@ export function DataCenterTabs({
         />
       </div>
     ))}
-    <button className="datacenter-tab" onClick={onCreateDataCenter} title="새 데이터센터 추가">
-      <Plus size={20} />
-    </button>
+    {userRole !== 'VIEWER' && (
+      <button className="datacenter-tab" onClick={onCreateDataCenter} title="새 데이터센터 추가">
+        <Plus size={20} />
+      </button>
+    )}
   </div>
   );
 }
