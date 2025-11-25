@@ -39,6 +39,7 @@ interface Equipment3DModelProps {
       originalGridY: number;
     }[]
   ) => Promise<boolean>; // Promise<boolean> 반환으로 변경
+  alertLevel?: 'CRITICAL' | 'WARNING'; // 알림 레벨 추가
 }
 
 function Equipment3DModel({
@@ -54,6 +55,7 @@ function Equipment3DModel({
   onRightClick, // 우클릭 핸들러
   selectedEquipmentIds = [],
   onMultiDragEnd,
+  alertLevel,
 }: Equipment3DModelProps) {
   const meshRef = useRef<AbstractMesh | null>(null);
   const dragBehaviorRef = useRef<PointerDragBehavior | null>(null);
@@ -617,6 +619,79 @@ function Equipment3DModel({
     updateHighlight(meshRef.current);
   }, [isSelected, isLoaded]);
 
+  // 알림 깜박임 효과
+  useEffect(() => {
+    if (!meshRef.current || !isLoaded || !alertLevel) return;
+
+    const mesh = meshRef.current;
+    const childMeshes = mesh.getChildMeshes();
+    
+    // 깜빡임 색상 설정 (선택 표시처럼 강한 하이라이트 색상)
+    const alertColor = alertLevel === 'CRITICAL' 
+      ? Color3.FromHexString('#FF0000') // 빨간색
+      : Color3.FromHexString('#FFD700'); // 금색/노란색
+    
+    let blinkInterval: number | null = null;
+    let isBlinkOn = true;
+    
+    // 깜빡임 애니메이션 (0.5초 간격)
+    const updateBlink = (meshToUpdate: AbstractMesh) => {
+      if (meshToUpdate.material && 'emissiveColor' in meshToUpdate.material) {
+        const material = meshToUpdate.material as { emissiveColor: Color3 };
+        
+        if (isBlinkOn) {
+          // 깜빡임 ON: 선택 표시처럼 강한 하이라이트 (0.3은 선택 표시와 동일)
+          material.emissiveColor = alertColor.scale(0.3);
+        } else {
+          // 깜박임 OFF: 원래 색상 또는 어두운 상태
+          const originalColor = originalEmissiveColors.current.get(
+            meshToUpdate.uniqueId.toString()
+          );
+          if (originalColor) {
+            material.emissiveColor = originalColor.clone();
+          } else {
+            material.emissiveColor = new Color3(0.1, 0.1, 0.1);
+          }
+        }
+      }
+    };
+    
+    blinkInterval = setInterval(() => {
+      isBlinkOn = !isBlinkOn;
+      childMeshes.forEach(updateBlink);
+      updateBlink(mesh);
+    }, 500) as unknown as number;
+    
+    // 초기 상태 설정
+    childMeshes.forEach(updateBlink);
+    updateBlink(mesh);
+    
+    // 정리
+    return () => {
+      if (blinkInterval !== null) {
+        clearInterval(blinkInterval);
+      }
+      
+      // 원래 색상으로 복원
+      const restoreOriginalColor = (meshToRestore: AbstractMesh) => {
+        if (meshToRestore.material && 'emissiveColor' in meshToRestore.material) {
+          const material = meshToRestore.material as { emissiveColor: Color3 };
+          const originalColor = originalEmissiveColors.current.get(
+            meshToRestore.uniqueId.toString()
+          );
+          if (originalColor) {
+            material.emissiveColor = originalColor.clone();
+          } else {
+            material.emissiveColor = new Color3(1, 1, 1);
+          }
+        }
+      };
+      
+      childMeshes.forEach(restoreOriginalColor);
+      restoreOriginalColor(mesh);
+    };
+  }, [alertLevel, isLoaded]);
+
   return null;
 }
 
@@ -639,7 +714,8 @@ const MemoizedEquipment3DModel = memo(
       prevProps.cellSize === nextProps.cellSize &&
       prevProps.modelPath === nextProps.modelPath &&
       prevProps.isSelected === nextProps.isSelected &&
-      prevProps.isDraggable === nextProps.isDraggable;
+      prevProps.isDraggable === nextProps.isDraggable &&
+      prevProps.alertLevel === nextProps.alertLevel;
 
     // selectedEquipmentIds는 이 장비가 선택되었는지 여부만 확인
     const wasSelected =
