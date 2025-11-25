@@ -16,6 +16,8 @@ export { default as ContextSwitchesSparkline } from './ContextSwitchesSparkline'
 export { default as NetworkErrorChart } from './NetworkErrorChart';
 export { default as CpuUsageDetailChart } from './CpuUsageDetailChart';
 export { default as TemperatureHumidityChart } from './TemperatureHumidityChart';
+export { default as EquipmentTypeChart } from './EquipmentTypeChart';
+export { default as TopEquipmentsTable } from './TopEquipmentsTable';
 
 //다른 컴포넌트
 export { default as ProgressGauge } from './ProgressGauge';
@@ -24,3 +26,4 @@ export { default as HierarchySidebar } from './HierarchySidebar';
 export { default as DatacenterDashboard } from './DatacenterDashboard';
 export { default as ServerRoomDashboard } from './ServerRoomDashboard';
 export { default as RackDashboard } from './RackDashboard';
+export { default as DashboardEmptyFallback } from './DashboardEmptyFallback';

@@ -27,7 +27,7 @@ export default function TableHeaderCheckbox<TData>({
     <input
       type="checkbox"
       ref={ref}
-      className="rounded border-gray-600 bg-gray-700 focus:ring-slate-300/40"
+      className="w-5 h-5 rounded border-gray-600 bg-gray-700 focus:ring-slate-300/40"
       checked={table.getIsAllRowsSelected()}
       onChange={table.getToggleAllRowsSelectedHandler()}
     />

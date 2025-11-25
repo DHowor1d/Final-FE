@@ -17,9 +17,10 @@ const ServerRoomDashboard: React.FC = () => {
     datacenterId ? parseInt(datacenterId, 10) : null
   );
 
-  // 로그인한 사용자의 회사 ID 가져오기
+  // 로그인한 사용자의 회사 ID 및 권한 가져오기
   const { user } = useAuthStore();
   const companyId = user?.companyId;
+  const userRole = user?.role;
 
   // 데이터 조회
   const {
@@ -137,12 +138,14 @@ const ServerRoomDashboard: React.FC = () => {
           </div>
           <DashboardStats stats={stats} />
         </div>
-        <button
-          className="btn-create px-4 py-3"
-          onClick={serverRoomActions.openCreateModal}
-        >
-          + 새 서버실 추가
-        </button>
+        {userRole !== 'VIEWER' && (
+          <button
+            className="btn-create px-4 py-3"
+            onClick={serverRoomActions.openCreateModal}
+          >
+            + 새 서버실 추가
+          </button>
+        )}
       </header>
 
       {/* Data Center Tabs */}
@@ -153,6 +156,7 @@ const ServerRoomDashboard: React.FC = () => {
         onEditDataCenter={dataCenterActions.openEditModal}
         onDeleteDataCenter={dataCenterActions.openDeleteModal}
         onCreateDataCenter={dataCenterActions.openCreateModal}
+        userRole={userRole}
       />
 
       {/* Main Content */}

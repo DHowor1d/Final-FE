@@ -184,6 +184,5 @@ export const useAllEquipmentBackgroundSSE = (
       });
       eventSourceMap.clear();
     };
-    // ✅ equipmentIds만 dependency에 포함 (callbacks은 제외)
   }, [equipmentIds]);
 };

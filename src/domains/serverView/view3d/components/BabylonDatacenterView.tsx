@@ -19,6 +19,7 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { LoadingSpinner } from '@/shared/loading';
 import { createDevice } from '../api/serverRoomEquipmentApi';
 import { getNextDeviceNumber, generateDeviceName } from '../utils/deviceNameGenerator';
+import { useServerRoomAlerts } from '@/shared/hooks/useServerRoomAlerts';
 import type { EquipmentType, Equipment3D } from '../../types';
 
 interface BabylonDatacenterViewProps {
@@ -70,6 +71,9 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
   } = useServerRoomEquipment(serverRoomId);
 
   const isEquipmentReady = !equipmentLoading && !equipmentFetching;
+
+  // 알림 상태 (서버실 ID로 필터링)
+  const { rackAlerts } = useServerRoomAlerts(serverRoomId ? Number(serverRoomId) : undefined);
 
   // 커스텀 훅들
   const { toast, showToast, hideToast } = useToast();
@@ -357,6 +361,12 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
             const paletteItem = EQUIPMENT_PALETTE.find((p) => p.type === eq.type);
             if (!paletteItem) return null;
 
+            const rackIdKey = eq.rackId ? Number(eq.rackId) : undefined;
+            const alertStatus =
+              rackIdKey !== undefined && !Number.isNaN(rackIdKey)
+                ? rackAlerts.get(rackIdKey)
+                : undefined;
+            
             return (
               <Equipment3DModel
                 key={eq.id}
@@ -372,6 +382,7 @@ function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: Bab
                   onRightClick={mode === 'edit' ? rightClickHandler : undefined} // edit 모드에서만 우클릭 핸들러 전달
                   selectedEquipmentIds={selectedEquipmentIds}
                   onMultiDragEnd={handleMultipleEquipmentPositionsChange}
+                  alertLevel={alertStatus?.level}
                 />
               );
             })}
