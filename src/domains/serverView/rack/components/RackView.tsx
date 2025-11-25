@@ -66,14 +66,11 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
   );
 
   const backgroundSSEEquipmentIds = useMemo(() => {
-    const shouldStart =
-      !rackManager.isLoading && selectableEquipmentIds.length > 0;
-
-    if (shouldStart) {
-      return selectableEquipmentIds;
+    if (rackManager.isLoading || selectableEquipmentIds.length === 0) {
+      return [];
     }
-    return [];
-  }, [rackManager.isLoading, selectableEquipmentIds]);
+    return selectableEquipmentIds.filter((id) => id !== selectedDevice?.id);
+  }, [rackManager.isLoading, selectableEquipmentIds, selectedDevice?.id]);
 
   const backgroundCallbacks = useCallback(
     () => ({
