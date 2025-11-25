@@ -95,13 +95,28 @@ export const createSSEConnection = <T = unknown>(
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith("data:")) {
-            try {
-              const data = JSON.parse(line.substring(5).trim());
-              onMessage(data);
-            } catch (error) {
-              console.error("Failed to parse SSE data:", error);
+          if (!line.startsWith("data:")) {
+            continue;
+          }
+
+          const payload = line.substring(5).trim();
+          if (!payload) {
+            continue;
+          }
+
+          // 일부 서버는 연결 확인을 위해 단순 문자열을 보낼 수 있으므로 JSON 형태만 처리
+          if (!payload.startsWith("{") && !payload.startsWith("[")) {
+            if (import.meta.env.DEV) {
+              console.debug("Ignoring non-JSON SSE payload:", payload);
             }
+            continue;
+          }
+
+          try {
+            const data = JSON.parse(payload);
+            onMessage(data);
+          } catch (error) {
+            console.error("Failed to parse SSE data:", error, payload);
           }
         }
       }

@@ -1,51 +1,19 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { alertApi, type Alert } from "@/api/alertApi";
-import { createAlertSSE } from "@/api/sseClient";
+import { useAlertStore } from "@/shared/store/useAlertStore";
 
 function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const alerts = useAlertStore((state) => state.alerts);
+  const clearAlerts = useAlertStore((state) => state.clearAlerts);
 
-  const unreadCount = alerts.filter((alert) => !alert.isRead).length;
+  const latestAlerts = useMemo(() => alerts.slice(0, 50), [alerts]);
 
-  // SSE 연결 및 초기 데이터 로드
-  useEffect(() => {
-    // 초기 알림 데이터 가져오기
-    const fetchInitialAlerts = async () => {
-      try {
-        const response = await alertApi.getAlerts({ page: 0, size: 20, days: 7 });
-        setAlerts(response.content);
-      } catch (error) {
-        console.error("Failed to fetch initial alerts:", error);
-      }
-    };
-
-    fetchInitialAlerts();
-
-    // SSE 연결 생성
-    const sseConnection = createAlertSSE<Alert>({
-      onMessage: (newAlert) => {
-        console.log("New alert received:", newAlert);
-        // 새 알림을 맨 앞에 추가
-        setAlerts((prev) => [newAlert, ...prev]);
-      },
-      onError: (error) => {
-        console.error("Alert SSE error:", error);
-      },
-      onOpen: () => {
-        console.log("Alert SSE connection established");
-      },
-    });
-
-    // 컴포넌트 언마운트 시 SSE 연결 종료
-    return () => {
-      sseConnection.close();
-    };
-  }, []);
+  const unreadCount = latestAlerts.filter((alert) => !alert.isRead).length;
 
   // 외부 클릭 감지
   useEffect(() => {
@@ -74,7 +42,7 @@ function NotificationBell() {
   const handleDeleteAll = async () => {
     try {
       await alertApi.deleteAllAlerts();
-      setAlerts([]);
+      clearAlerts();
     } catch (error) {
       console.error("Failed to delete all alerts:", error);
     }
@@ -137,13 +105,13 @@ function NotificationBell() {
         <div className="absolute right-0 mt-2 w-80 bg-black/40 backdrop-blur-sm rounded-lg shadow-xl border border-slate-300/40 z-1000 overflow-hidden">
 
           <div className="max-h-96 overflow-y-auto">
-            {alerts.length === 0 ? (
+            {latestAlerts.length === 0 ? (
               <div className="px-4 py-8 text-center text-gray-400">
                 새로운 알림이 없습니다.
               </div>
             ) : (
               <div className="divide-y divide-gray-700">
-                {alerts.map((alert) => (
+                {latestAlerts.map((alert) => (
                   <div
                     key={alert.alertId}
                     onClick={() => handleAlertClick(alert)}
@@ -180,7 +148,7 @@ function NotificationBell() {
             )}
           </div>
 
-          {alerts.length > 0 && (
+          {latestAlerts.length > 0 && (
             <div className="px-4 py-2 border-t border-gray-700">
               <button 
                 onClick={handleDeleteAll}
