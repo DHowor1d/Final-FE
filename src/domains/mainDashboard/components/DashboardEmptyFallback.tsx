@@ -32,13 +32,13 @@ function DashboardEmptyFallback({ error }: DashboardEmptyFallbackProps) {
         {title}
       </h2>
       
-      <p className="text-gray-400 text-center max-w-md leading-relaxed">
+      <p className="text-gray-200 text-center max-w-lg leading-relaxed">
         {message}
       </p>
 
       <div className="mt-8 p-4 bg-neutral-800 rounded-lg border border-neutral-700">
-        <p className="text-sm text-gray-500 text-center">
-          💡 장비 배치는 <span className="text-blue-400">서버실 뷰</span>에서 할 수 있습니다
+        <p className="text-base text-gray-200 text-center font-medium">
+          장비 배치는 <span className="text-green-600">서버실 뷰</span>에서 할 수 있습니다
         </p>
       </div>
     </div>

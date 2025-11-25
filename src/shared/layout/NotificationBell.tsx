@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { alertApi, type Alert } from "@/api/alertApi";
 import { createAlertSSE } from "@/api/sseClient";
@@ -7,6 +8,7 @@ function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const unreadCount = alerts.filter((alert) => !alert.isRead).length;
 
@@ -78,6 +80,14 @@ function NotificationBell() {
     }
   };
 
+  const handleAlertClick = (alert: Alert) => {
+    // 서버룸으로 이동
+    if (alert.serverRoomId) {
+      navigate(`/server-room/${alert.serverRoomId}/view`);
+      setIsOpen(false);
+    }
+  };
+
   const formatTimestamp = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -136,6 +146,7 @@ function NotificationBell() {
                 {alerts.map((alert) => (
                   <div
                     key={alert.alertId}
+                    onClick={() => handleAlertClick(alert)}
                     className={`px-4 py-3 hover:bg-gray-750 transition-colors cursor-pointer ${
                       !alert.isRead ? "bg-gray-750/50" : ""
                     }`}
