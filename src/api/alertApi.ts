@@ -48,18 +48,23 @@ export const alertApi = {
     return response.data;
   },
 
-  // 알림 읽음 처리 (필요시 구현)
+  // 알림 읽음 처리
   markAsRead: async (alertId: number): Promise<void> => {
     await client.patch(`/alerts/${alertId}/read`);
   },
 
-  // 모든 알림 읽음 처리 (필요시 구현)
+  // 모든 알림 읽음 처리
   markAllAsRead: async (): Promise<void> => {
     await client.patch("/alerts/read-all");
   },
 
-  // 알림 삭제 (필요시 구현)
+  // 알림 삭제
   deleteAlert: async (alertId: number): Promise<void> => {
     await client.delete(`/alerts/${alertId}`);
+  },
+
+  // 모든 알림 삭제
+  deleteAllAlerts: async (): Promise<void> => {
+    await client.delete("/alerts/delete-all");
   },
 };

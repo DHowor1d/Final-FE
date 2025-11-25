@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { alertApi, type Alert } from "@/api/alertApi";
+import { createAlertSSE } from "@/api/sseClient";
 
 function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,22 +10,39 @@ function NotificationBell() {
 
   const unreadCount = alerts.filter((alert) => !alert.isRead).length;
 
-  // 알림 데이터 가져오기
+  // SSE 연결 및 초기 데이터 로드
   useEffect(() => {
-    const fetchAlerts = async () => {
+    // 초기 알림 데이터 가져오기
+    const fetchInitialAlerts = async () => {
       try {
-        const response = await alertApi.getAlerts({ page: 0, size: 10, days: 7 });
+        const response = await alertApi.getAlerts({ page: 0, size: 20, days: 7 });
         setAlerts(response.content);
       } catch (error) {
-        console.error("Failed to fetch alerts:", error);
+        console.error("Failed to fetch initial alerts:", error);
       }
     };
 
-    fetchAlerts();
-    
-    // 30초마다 알림 업데이트
-    const interval = setInterval(fetchAlerts, 30000);
-    return () => clearInterval(interval);
+    fetchInitialAlerts();
+
+    // SSE 연결 생성
+    const sseConnection = createAlertSSE<Alert>({
+      onMessage: (newAlert) => {
+        console.log("New alert received:", newAlert);
+        // 새 알림을 맨 앞에 추가
+        setAlerts((prev) => [newAlert, ...prev]);
+      },
+      onError: (error) => {
+        console.error("Alert SSE error:", error);
+      },
+      onOpen: () => {
+        console.log("Alert SSE connection established");
+      },
+    });
+
+    // 컴포넌트 언마운트 시 SSE 연결 종료
+    return () => {
+      sseConnection.close();
+    };
   }, []);
 
   // 외부 클릭 감지
@@ -49,7 +67,15 @@ function NotificationBell() {
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
-    // TODO: 드롭다운을 열 때 읽음 처리 API 호출
+  };
+
+  const handleDeleteAll = async () => {
+    try {
+      await alertApi.deleteAllAlerts();
+      setAlerts([]);
+    } catch (error) {
+      console.error("Failed to delete all alerts:", error);
+    }
   };
 
   const formatTimestamp = (dateString: string) => {
@@ -145,7 +171,10 @@ function NotificationBell() {
 
           {alerts.length > 0 && (
             <div className="px-4 py-2 border-t border-gray-700">
-              <button className="text-gray-50 hover:text-red-300 text-sm font-medium w-full text-center">
+              <button 
+                onClick={handleDeleteAll}
+                className="text-gray-50 hover:text-red-300 text-sm font-medium w-full text-center"
+              >
                 모두 지우기
               </button>
             </div>
