@@ -1,3 +1,12 @@
+/**
+ * @author 김대호
+ * @description Babylon.js 씬 초기화 및 관리 훅 - 3D 렌더링 엔진과 씬을 설정
+ * Babylon.js Engine과 Scene을 생성하고 카메라, 조명을 초기화
+ * 아이소메트릭 뷰를 위한 ArcRotateCamera 설정 (상단에서 비스듬히 내려다보는 시점)
+ * 렌더 루프 관리 및 윈도우 리사이즈 이벤트 처리
+ * 컴포넌트 언마운트 시 엔진과 씬을 정리하여 메모리 누수 방지
+ */
+
 import { useRef, useEffect, useState } from 'react';
 import { Engine, Scene, ArcRotateCamera, HemisphericLight, Vector3, Color4 } from '@babylonjs/core';
 import { CAMERA_CONFIG } from '../../constants/config';
@@ -9,7 +18,12 @@ interface UseBabylonSceneParams {
   isLoading?: boolean;
 }
 
-/** Babylon.js 씬 초기화 및 관리 */
+/**
+ * @function useBabylonScene
+ * @description Babylon.js 씬 초기화 및 관리 훅
+ * @param {UseBabylonSceneParams} params - canvas ref, 그리드 설정, 로딩 상태
+ * @returns {Object} 씬 객체, 씬 준비 상태, 카메라 리셋 함수
+ */
 export function useBabylonScene({ canvasRef, gridConfig, isLoading = false }: UseBabylonSceneParams) {
   const engineRef = useRef<Engine | null>(null);
   const [scene, setScene] = useState<Scene | null>(null);

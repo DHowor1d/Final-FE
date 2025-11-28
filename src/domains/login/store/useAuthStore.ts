@@ -1,10 +1,9 @@
 /**
- * @author 구희원 김대호
- * @description Zustand 기반 인증 상태 관리 스토어
- *
- * - Access Token과 사용자 정보 관리
- * - 로그인, 로그아웃, 인증 상태 복원 기능 제공
- * - localStorage에는 보안상 토큰을 저장하지 않고 사용자 정보와 인증 상태만 저장
+ * @author 김대호
+ * @description 인증 상태 관리 Zustand 스토어 - 사용자 로그인 상태와 토큰을 관리
+ * Access Token은 메모리에만 저장하고, Refresh Token은 httpOnly 쿠키로 관리하여 보안 강화
+ * 사용자 정보는 localStorage에 persist하여 페이지 새로고침 후에도 로그인 상태 유지
+ * restoreAuth로 토큰 갱신 및 자동 로그인 복구 기능 제공
  */
 
 import { create } from "zustand";
@@ -21,13 +20,7 @@ type User = Omit<LoginResponse, "accessToken">;
 
 /**
  * @interface AuthStore
- * @description 인증 상태 및 관련 메서드 정의
- * @property {string | null} accessToken - 메모리에 저장된 Access Token
- * @property {User | null} user - 사용자 정보
- * @property {boolean} authenticated - 인증 여부
- * @property {(response: LoginResponse) => void} login - 로그인 처리
- * @property {() => void} logout - 로그아웃 처리
- * @property {() => Promise<void>} restoreAuth - 인증 상태 복원
+ * @description 인증 스토어 타입 정의 - 로그인 상태, 사용자 정보, 인증 관련 메서드
  */
 interface AuthStore {
   accessToken: string | null;
@@ -39,8 +32,8 @@ interface AuthStore {
 }
 
 /**
- * @function useAuthStore
- * @description Zustand 인증 스토어 훅
+ * @constant useAuthStore
+ * @description 인증 상태를 관리하는 Zustand 스토어 - 로그인/로그아웃, 토큰 관리
  */
 export const useAuthStore = create<AuthStore>()(
   persist(
@@ -50,9 +43,9 @@ export const useAuthStore = create<AuthStore>()(
       authenticated: false,
 
       /**
-       * 로그인 처리
-       * - 메모리에 Access Token 저장
-       * - 사용자 정보와 인증 상태 업데이트
+       * @function login
+       * @description 로그인 성공 시 토큰과 사용자 정보를 스토어에 저장
+       * @param {LoginResponse} response - 로그인 API 응답 (액세스 토큰 및 사용자 정보)
        */
       login: (response) => {
         const { accessToken, ...user } = response;
@@ -65,9 +58,8 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       /**
-       * 로그아웃 처리
-       * - 메모리에서 Access Token 제거
-       * - 사용자 정보 및 인증 상태 초기화
+       * @function logout
+       * @description 로그아웃 시 모든 인증 정보를 제거하고 초기화
        */
       logout: () => {
         setAccessToken(null);
@@ -79,10 +71,9 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       /**
-       * 인증 상태 복원
-       * - localStorage에서 사용자 정보와 인증 상태 확인
-       * - refresh token으로 새 Access Token 발급 시도
-       * - 실패 시 로그아웃 처리
+       * @function restoreAuth
+       * @description 페이지 로드 시 localStorage의 인증 상태로부터 세션 복구
+       * Refresh Token을 사용하여 새로운 Access Token 발급
        */
       restoreAuth: async () => {
         const state = get();

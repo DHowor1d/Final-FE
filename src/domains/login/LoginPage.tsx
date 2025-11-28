@@ -1,3 +1,11 @@
+/**
+ * @author 김대호
+ * @description 로그인 페이지 - 사용자 인증을 처리하는 메인 로그인 페이지
+ * 이메일 형식 아이디와 비밀번호를 입력받아 서버 인증 수행
+ * 한글 입력 방지 및 실시간 유효성 검사 기능 포함
+ * 네트워크 애니메이션과 배경 효과로 현대적인 UI 제공
+ */
+
 import { useState } from "react";
 import AnimationBackground from "./components/AnimationBackground";
 import Input from "./components/Input";
@@ -16,6 +24,11 @@ import {
 import { useLogin } from "./hooks/useLogin";
 import LoadingSpinner from "@/shared/loading/LoadingSpinner";
 
+/**
+ * @function LoginPage
+ * @description 로그인 페이지 컴포넌트 - 사용자 인증 처리
+ * @returns {JSX.Element} 로그인 페이지 UI
+ */
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

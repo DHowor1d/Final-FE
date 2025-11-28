@@ -1,11 +1,10 @@
 /**
- * @author 구희원 김대호
- * @description Axios 기반 API 클라이언트 설정 및 In-Memory Access Token 관리 로직
- *
- * - In-memory에 Access Token 저장 및 참조
- * - 요청 인터셉터에서 Authorization 헤더 자동 주입
- * - 401 발생 시 Refresh Token 기반 토큰 재발급 처리
- * - 재발급 실패 시 자동 로그아웃 및 메인 페이지로 이동
+ * @author 김대호
+ * @description API 클라이언트 설정 - axios 기반 HTTP 클라이언트
+ * Access Token을 메모리에 저장하고 요청에 자동 포함
+ * Refresh Token은 HttpOnly 쿠키로 관리하여 보안 강화
+ * 401 에러 발생 시 자동으로 토큰 갱신 시도하는 인터셉터 포함
+ * 토큰 갱신 실패 시 로그인 페이지로 자동 리다이렉트
  */
 
 import axios from "axios";
@@ -20,21 +19,24 @@ export const BASE_URL = "https://api.serverway.shop/api";
 let accessTokenInMemory: string | null = null;
 
 /**
- * Access Token 저장
- * @param {string | null} token - 저장할 액세스 토큰
+ * @function setAccessToken
+ * @description Access Token을 메모리에 저장
+ * @param {string | null} token - 저장할 Access Token
  */
 export const setAccessToken = (token: string | null) => {
   accessTokenInMemory = token;
 };
 
 /**
- * 현재 In-Memory Access Token 반환
- * @returns {string | null} Access Token
+ * @function getAccessToken
+ * @description 메모리에서 Access Token 가져오기
+ * @returns {string | null} 저장된 Access Token
  */
 export const getAccessToken = () => accessTokenInMemory;
 
 /**
- * Axios 기본 클라이언트 설정
+ * @constant client
+ * @description axios 인스턴스 - 모든 API 요청에 사용
  */
 const client = axios.create({
   baseURL: BASE_URL,

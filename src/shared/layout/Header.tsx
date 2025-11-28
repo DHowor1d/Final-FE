@@ -1,3 +1,12 @@
+/**
+ * @author 김대호
+ * @description 공통 헤더 컴포넌트 - 네비게이션 메뉴와 로그아웃 기능을 제공하는 헤더
+ * 로고, 네비게이션 메뉴(대시보드, 서버실, 자원관리, 회원관리), 알림, 사용자 정보 표시
+ * 사용자 권한에 따라 회원관리 메뉴 표시 여부 결정 (ADMIN, OPERATOR만 접궼 가능)
+ * NavLink로 현재 활성 페이지를 시각적으로 구분하여 표시
+ * 로그아웃 기능으로 인증 상태 초기화 및 로그인 페이지로 리다이렉트
+ */
+
 import { useNavigate, NavLink } from "react-router-dom";
 import { LiaCubesSolid } from "react-icons/lia";
 import { GrResources } from "react-icons/gr";
@@ -6,6 +15,11 @@ import { MdOutlinePeopleAlt, MdLogout } from "react-icons/md";
 import { useAuthStore } from "@domains/login/store/useAuthStore";
 import NotificationBell from "./NotificationBell";
 
+/**
+ * @function Header
+ * @description 공통 헤더 컴포넌트 - 반응형 네비게이션과 사용자 메뉴 제공
+ * @returns {JSX.Element} 헤더 UI
+ */
 function Header() {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();

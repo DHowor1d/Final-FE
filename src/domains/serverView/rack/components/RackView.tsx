@@ -1,6 +1,9 @@
 /**
- * @author 구희원
- * @description 랙 상세 뷰 컴포넌트
+ * @author 김대호
+ * @description 랙 뷰 컴포넌트 - 랙 내부의 서버 장비를 시각화하고 관리하는 컴포넌트
+ * 랙의 앞면/뒷면 전환, 장비 배치 편집 모드, 실시간 모니터링 대시보드 기능 제공
+ * 서버와 스토리지 장비 클릭 시 상세 메트릭 정보를 SSE로 수신하여 표시
+ * VIEWER 권한은 편집 모드 사용 불가
  */
 
 import Rack from "../components/Rack";
@@ -25,12 +28,10 @@ interface RackViewProps {
 }
 
 /**
- * 랙 상세 뷰
- * @param {RackViewProps} props - 랙 뷰 속성
- * @param {() => void} props.onClose - 닫기 핸들러
- * @param {string} props.rackName - 랙 이름
- * @param {number} props.serverRoomId - 서버룸 ID
- * @returns 랙 상세 뷰 컴포넌트
+ * @function RackView
+ * @description 랙 내부 장비 뷰어 컴포넌트 - U 단위로 장비 배치 및 모니터링
+ * @param {RackViewProps} props - 랙 이름, 서버실 ID, 닫기 콜백
+ * @returns {JSX.Element} 랙뷰 UI
  */
 function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
   const [frontView, setFrontView] = useState(true);

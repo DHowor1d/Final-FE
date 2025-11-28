@@ -1,3 +1,13 @@
+/**
+ * @author 김대호
+ * @description Babylon.js 3D 뷰 전역 상태 관리 Zustand 스토어
+ * 서버실의 장비 배치, 선택 상태, 편집/보기 모드, 그리드 설정 등을 관리
+ * 장비 추가/삭제/이동/회전, 다중 선택, Undo/Redo 기능 제공
+ * 장비 변경사항 추적 및 저장되지 않은 변경사항 감지
+ * 그리드 버전 관리로 그리드 변경 시 씬 재렌더링 트리거
+ * 서버실별 독립적인 상태 관리 (서버실 전환 시 상태 초기화)
+ */
+
 import { create } from "zustand";
 import type { Equipment3D, EquipmentType, GridConfig } from "../../types";
 import {
@@ -6,11 +16,15 @@ import {
 } from "../../constants/config";
 
 /**
- * 장비 목록의 변경 여부를 감지
+ * @function hasEquipmentChanges
+ * @description 장비 목록의 변경 여부를 감지
  * - 장비 개수 변화
  * - 장비 위치 변화 (gridX, gridY, gridZ)
  * - 장비 회전 변화
  * - 장비 상태 변화
+ * @param {Equipment3D[]} currentEquipment - 현재 장비 목록
+ * @param {Equipment3D[]} newEquipment - 새로운 장비 목록
+ * @returns {boolean} 변경 여부
  */
 function hasEquipmentChanges(
   currentEquipment: Equipment3D[],

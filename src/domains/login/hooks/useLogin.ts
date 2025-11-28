@@ -1,11 +1,8 @@
 /**
- * @author 구희원
- * @description 로그인 API 연동 및 상태 관리 훅
- *
- * - React Query의 useMutation을 사용하여 로그인 요청 처리
- * - 로그인 성공 시 Zustand를 통해 인증 상태 갱신
- * - 로그인 성공 시 대시보드 페이지로 이동
- * - 로그인 실패 시 콘솔에 에러 출력
+ * @author 김대호
+ * @description 로그인 훅 - 로그인 처리를 위한 React Query mutation hook
+ * 로그인 API를 호출하고 성공 시 인증 상태를 스토어에 저장하고 대시보드로 리다이렉트
+ * 실패 시 에러 로그5 및 사용자에게 피드백 표시
  */
 
 import { useMutation } from "@tanstack/react-query";
@@ -16,9 +13,8 @@ import type { LoginRequest } from "../types/login";
 
 /**
  * @function useLogin
- * @returns {Mutation<LoginResponse, unknown, LoginRequest>}
- *   - login: 로그인 요청 함수
- *   - isLoading, isError 등 React Query 상태 포함
+ * @description 로그인 mutation hook - 로그인 요청 처리 및 네비게이션
+ * @returns {UseMutationResult} React Query mutation 객체
  */
 export const useLogin = () => {
   const navigate = useNavigate();

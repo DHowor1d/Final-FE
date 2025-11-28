@@ -1,3 +1,12 @@
+/**
+ * @author 김대호
+ * @description 리소스 관리 페이지 - 서버 및 네트워크 장비 등 IT 리소스를 관리하는 페이지
+ * 리소스 목록 조회, 필터링, 추가, 수정, 삭제 기능 제공
+ * 위저드 형식의 모달로 리소스 생성 프로세스 간소화
+ * 상태별 필터링, 검색, 일괄 작업(삭제, 상태 변경) 기능 지원
+ * 서버실별 리소스 분류 및 관리
+ */
+
 import { useState, useMemo, useEffect } from 'react';
 import {
   useReactTable,
@@ -34,6 +43,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import Snackbar from '@shared/Snackbar';
 
+/**
+ * @function ResourceManagePage
+ * @description 리소스 관리 페이지 컴포넌트 - IT 자산 목록 관리 및 CRUD 작업
+ * @returns {JSX.Element} 리소스 관리 페이지 UI
+ */
 export default function ResourceManagePage() {
   const queryClient = useQueryClient();
   
