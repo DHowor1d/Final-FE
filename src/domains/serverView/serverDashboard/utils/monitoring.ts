@@ -1,5 +1,19 @@
+/**
+ * @author 구희원
+ * @description 모니터링 데이터 처리 유틸리티
+ */
+
 import type { NetworkMonitoringData } from "../types";
 
+/**
+ * 시간 레이블 생성
+ *
+ * 히스토리 데이터에서 시간 레이블을 생성합니다 (HH:MM:SS 형식).
+ *
+ * @param {T[]} history - 시간 정보가 있는 히스토리 데이터
+ * @param {number} maxPoints - 최대 포인트 수 (기본값: 12)
+ * @returns {string[]} 시간 레이블 배열
+ */
 export const generateTimeLabels = <T extends { generateTime: string }>(
   history: T[],
   maxPoints: number = 12
@@ -13,22 +27,51 @@ export const generateTimeLabels = <T extends { generateTime: string }>(
   });
 };
 
+/**
+ * Bytes를 GB로 변환
+ * @param {number} bytes - 바이트 값
+ * @returns {number} GB 값
+ */
 export const bytesToGB = (bytes: number): number => {
   return bytes / 1024 ** 3;
 };
 
+/**
+ * Bytes를 MB로 변환
+ * @param {number} bytes - 바이트 값
+ * @returns {number} MB 값
+ */
 export const bytesToMB = (bytes: number): number => {
   return bytes / 1024 ** 2;
 };
 
+/**
+ * KB를 MB로 변환
+ * @param {number} kb - KB 값
+ * @returns {number} MB 값
+ */
 export const kbToMB = (kb: number): number => {
   return kb / 1024;
 };
 
+/**
+ * Bytes를 Mbps로 변환
+ * @param {number} bytes - 바이트 값
+ * @returns {number} Mbps 값
+ */
 export const bytesToMbps = (bytes: number): number => {
   return (bytes * 8) / (1024 * 1024);
 };
 
+/**
+ * 네트워크 데이터를 시간별로 집계
+ *
+ * 여러 네트워크 인터페이스의 데이터를 시간대별로 그룹화하고 합산합니다.
+ *
+ * @param {NetworkMonitoringData[]} networkHistory - 네트워크 히스토리 데이터
+ * @param {number} maxPoints - 최대 포인트 수 (기본값: 12)
+ * @returns {{ rx: number[]; tx: number[]; timeLabels: string[] }} 집계된 네트워크 데이터
+ */
 export const aggregateNetworkByTime = (
   networkHistory: NetworkMonitoringData[],
   maxPoints: number = 12

@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 차트 카드 스타일시트
+ */
+
 @import "tailwindcss";
 
 /* 기본 차트 카드 */
@@ -5,29 +10,34 @@
   @apply bg-white/5 border border-slate-300/40 rounded-lg flex flex-col;
 }
 
-/* 크기별 스타일 */
+/* 차트 카드 크기별 스타일 */
+
+/* Small 사이즈 */
 .chart-card-small {
   @apply flex-1;
 }
 
-/* small 사이즈의 컨텐츠 margin 제거 */
-.chart-header-with-icon {
-  @apply flex items-center gap-2 px-3 pt-3;
-}
-
+/* Small 사이즈의 컨텐츠 margin 제거 */
 .chart-card-small .chart-content {
   @apply mx-0 mb-0;
 }
 
+/* Medium 사이즈 */
 .chart-card-medium {
   @apply flex-1;
 }
 
+/* Large 사이즈 */
 .chart-card-large {
   @apply flex-1;
 }
 
-/* 차트 헤더 */
+/* 차트 헤더 - 아이콘 포함 */
+.chart-header-with-icon {
+  @apply flex items-center gap-2 px-3 pt-3;
+}
+
+/* 차트 헤더 - 기본 */
 .chart-header {
   @apply flex items-center m-3;
 }

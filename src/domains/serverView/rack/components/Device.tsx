@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 랙 장비 디바이스 컴포넌트 (Konva)
+ */
+
 import { Group, Rect, Text, Line, Image } from "react-konva";
 import { useState, memo, useRef, useEffect } from "react";
 import { Html } from "react-konva-utils";
@@ -10,14 +15,23 @@ import deleteIcon from "../assets/delete.svg";
 import checkIcon from "../assets/check.svg";
 import ClickableIcon from "./ClickableIcon";
 
+/**
+ * 시스템 데이터
+ */
 interface SystemData {
   cpu: number;
   memory: number;
   disk: number;
 }
 
+/**
+ * 알림 상태 타입
+ */
 type AlertStatus = "normal" | "warning" | "critical";
 
+/**
+ * 디바이스 컴포넌트 props
+ */
 interface DeviceProps {
   device: Equipments;
   y: number;
@@ -40,6 +54,11 @@ interface DeviceProps {
   currentSystemData?: SystemData | null;
 }
 
+/**
+ * 랙 장비 디바이스
+ * @param {DeviceProps} props - 디바이스 속성
+ * @returns 디바이스 컴포넌트
+ */
 function Device({
   device,
   y,
@@ -78,7 +97,9 @@ function Device({
   const deleteImage = useImageLoad(deleteIcon);
   const checkImage = useImageLoad(checkIcon);
 
-  // 임계치 상태에 따른 색상 결정
+  /**
+   * 알림 상태에 따른 색상 반환
+   */
   const getAlertColor = () => {
     switch (alertStatus) {
       case "critical":
@@ -90,6 +111,9 @@ function Device({
     }
   };
 
+  /**
+   * 알림 상태에 따른 투명도 반환
+   */
   const getAlertOpacity = () => {
     switch (alertStatus) {
       case "critical":
@@ -211,7 +235,7 @@ function Device({
             <input
               ref={inputRef}
               type="text"
-              defaultValue={tempDeviceName} // value 대신 defaultValue
+              defaultValue={tempDeviceName}
               onCompositionStart={() => setIsComposing(true)}
               onCompositionEnd={() => setIsComposing(false)}
               onKeyDown={(e) => {

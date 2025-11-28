@@ -1,8 +1,25 @@
+/**
+ * @author 구희원
+ * @description 뷰 전환 토글 버튼 컴포넌트
+ */
+
+/**
+ * 뷰 토글 버튼 props
+ */
 interface ViewToggleButtonProps {
   label: string;
   onClick: () => void;
   active?: boolean;
 }
+
+/**
+ * 뷰 토글 버튼
+ * @param {ViewToggleButtonProps} props - 버튼 속성
+ * @param {string} props.label - 버튼 라벨
+ * @param {() => void} props.onClick - 클릭 이벤트 핸들러
+ * @param {boolean} props.active - 활성화 상태 (기본값: false)
+ * @returns 토글 버튼 컴포넌트
+ */
 function Button({ label, onClick, active = false }: ViewToggleButtonProps) {
   return (
     <button

@@ -21,14 +21,20 @@ export const useLogin = () => {
   const { login } = useAuthStore();
 
   const mutation = useMutation({
+    // 로그인 API 호출
     mutationFn: (data: LoginRequest) => loginApi(data),
+
+    // 로그인 성공 시 처리
     onSuccess: (response) => {
-      login(response);
-      navigate("/dashboard");
+      login(response); // Zustand 상태 업데이트
+      navigate("/dashboard"); // 대시보드 페이지 이동
     },
+
+    // 로그인 실패 시 처리
     onError: (error) => {
       console.error("Login failed:", error);
     },
   });
+
   return mutation;
 };

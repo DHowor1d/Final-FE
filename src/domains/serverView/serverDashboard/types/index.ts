@@ -1,5 +1,13 @@
+/**
+ * @author 구희원
+ * @description 서버 모니터링 타입 정의
+ */
+
 import type { Equipments } from "../../rack/types/index";
 
+/**
+ * 장비 수정 요청
+ */
 export interface UpdateEquipmentRequest
   extends Pick<
     Equipments,
@@ -15,6 +23,9 @@ export interface UpdateEquipmentRequest
   diskThresholdCritical: number;
 }
 
+/**
+ * 시스템 모니터링 데이터
+ */
 export interface SystemMonitoringData {
   id: number;
   equipmentId: number;
@@ -44,6 +55,9 @@ export interface SystemMonitoringData {
   usedSwapPercentage: number;
 }
 
+/**
+ * 디스크 모니터링 데이터
+ */
 export interface DiskMonitoringData {
   id: number;
   equipmentId: number;
@@ -63,6 +77,9 @@ export interface DiskMonitoringData {
   usedInodePercentage: number;
 }
 
+/**
+ * 네트워크 모니터링 데이터
+ */
 export interface NetworkMonitoringData {
   id: number;
   equipmentId: number;

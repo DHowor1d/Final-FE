@@ -1,6 +1,14 @@
+/**
+ * @author 구희원
+ * @description 장비 선택 드롭다운 컴포넌트
+ */
+
 import { useEffect, useRef } from "react";
 import type { EquipmentCard } from "../types";
 
+/**
+ * 드롭다운 컴포넌트 props
+ */
 interface DropdownProps {
   open: boolean;
   position: { x: number; y: number };
@@ -13,6 +21,20 @@ interface DropdownProps {
   isFetchingNextPage?: boolean;
 }
 
+/**
+ * 장비 선택 드롭다운
+ * @param {DropdownProps} props - 드롭다운 속성
+ * @param {boolean} props.open - 드롭다운 열림 상태
+ * @param {{ x: number; y: number }} props.position - 드롭다운 위치
+ * @param {EquipmentCard[]} props.items - 장비 목록
+ * @param {(item: EquipmentCard) => void} props.onSelect - 장비 선택 핸들러
+ * @param {() => void} props.onClose - 드롭다운 닫기 핸들러
+ * @param {boolean} props.isLoading - 로딩 상태
+ * @param {boolean} props.hasNextPage - 다음 페이지 존재 여부
+ * @param {() => Promise<unknown>} props.fetchNextPage - 다음 페이지 조회 함수
+ * @param {boolean} props.isFetchingNextPage - 다음 페이지 조회 중 상태
+ * @returns 드롭다운 컴포넌트
+ */
 function Dropdown({
   open,
   position,
@@ -27,6 +49,7 @@ function Dropdown({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // 무한 스크롤 처리
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) {
@@ -49,6 +72,7 @@ function Dropdown({
     };
   }, [open, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // 외부 클릭 및 컨텍스트 메뉴 처리
   useEffect(() => {
     if (!open) return;
 

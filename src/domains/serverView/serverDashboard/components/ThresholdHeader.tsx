@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 임계치 설정 헤더 컴포넌트
+ */
+
 import { useState, useEffect } from "react";
 import CpuIcon from "../assets/cpu.svg";
 import MemoryIcon from "../assets/memory.svg";
@@ -5,12 +10,18 @@ import DiskIcon from "../assets/disk.svg";
 import ThresholdMetricInput from "./ThresholdmetricInput";
 import ButtonPlaceholder from "./ButtonPlaceholder";
 
+/**
+ * 임계치 값
+ */
 export interface ThresholdValues {
   cpu: { warning: number; critical: number };
   memory: { warning: number; critical: number };
   disk: { warning: number; critical: number };
 }
 
+/**
+ * 임계치 헤더 props
+ */
 interface ThresholdHeaderProps {
   initialValues?: ThresholdValues;
   onSave?: (values: ThresholdValues) => void;
@@ -18,6 +29,15 @@ interface ThresholdHeaderProps {
   isLoading?: boolean;
 }
 
+/**
+ * 임계치 설정 헤더
+ * @param {ThresholdHeaderProps} props - 헤더 속성
+ * @param {ThresholdValues} props.initialValues - 초기 임계치 값
+ * @param {(values: ThresholdValues) => void} props.onSave - 저장 핸들러
+ * @param {boolean} props.isOpen - 대시보드 열림 상태
+ * @param {boolean} props.isLoading - 저장 중 로딩 상태
+ * @returns 임계치 설정 헤더 컴포넌트
+ */
 function ThresholdHeader({
   initialValues = {
     cpu: { warning: 70, critical: 90 },
@@ -31,12 +51,16 @@ function ThresholdHeader({
   const [editMode, setEditMode] = useState(false);
   const [values, setValues] = useState<ThresholdValues>(initialValues);
 
+  // 대시보드가 닫히면 편집 모드 해제
   useEffect(() => {
     if (!isOpen) {
       setEditMode(false);
     }
   }, [isOpen]);
 
+  /**
+   * 임계치 값 변경 핸들러
+   */
   const handleValueChange = (
     metric: keyof ThresholdValues,
     type: "warning" | "critical",
@@ -54,6 +78,9 @@ function ThresholdHeader({
     });
   };
 
+  /**
+   * 저장 핸들러
+   */
   const handleSave = () => {
     onSave?.(values);
     if (!isLoading) {
@@ -61,11 +88,17 @@ function ThresholdHeader({
     }
   };
 
+  /**
+   * 초기화 핸들러
+   */
   const handleReset = () => {
     setValues(initialValues);
     setEditMode(false);
   };
 
+  /**
+   * 편집 모드 토글 핸들러
+   */
   const handleToggleEdit = () => {
     if (editMode) {
       setValues(initialValues);
@@ -76,12 +109,12 @@ function ThresholdHeader({
   return (
     <div className="bg-white/5 border border-slate-300/40 rounded-xl p-4">
       <div className="flex items-center gap-7">
-        {/* Left: Title */}
+        {/* 제목 */}
         <div className="flex items-center gap-3 flex-shrink-0">
           <span className="text-white text-sm font-semibold">임계치 설정</span>
         </div>
 
-        {/* Center: Metrics */}
+        {/* 메트릭 입력 필드 */}
         <div className="flex items-center gap-3 flex-1">
           {/* CPU */}
           <ThresholdMetricInput
@@ -129,7 +162,7 @@ function ThresholdHeader({
           />
         </div>
 
-        {/* Right: Actions */}
+        {/* 액션 버튼 */}
         <div className="flex items-center gap-3">
           <ButtonPlaceholder
             editMode={editMode}

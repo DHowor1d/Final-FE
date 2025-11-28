@@ -1,33 +1,56 @@
+/**
+ * @author 구희원
+ * @description 모든 장비의 백그라운드 SSE 연결 훅
+ */
+
 import { useEffect, useRef } from "react";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import { getAccessToken, BASE_URL } from "@/api/client";
 import type { DiskMonitoringData, SystemMonitoringData } from "../types";
 
+/**
+ * SSE 이벤트
+ */
 interface SSEEvent extends Event {
   data: string;
 }
 
+/**
+ * 간단한 메트릭 정보
+ */
 export interface SimpleMetrics {
   cpu: number;
   memory: number;
   disk: number;
 }
 
+/**
+ * 백그라운드 SSE 콜백
+ */
 interface BackgroundSSECallbacks {
   onMetricsUpdate: (equipmentId: number, metrics: SimpleMetrics) => void;
   onConnectionError?: (equipmentId: number, error: Event) => void;
 }
 
+/**
+ * System 모니터링 데이터 타입 가드
+ */
 const isSystemMonitoringData = (
   data: unknown
 ): data is SystemMonitoringData => {
   return typeof data === "object" && data !== null && "cpuIdle" in data;
 };
 
+/**
+ * Disk 모니터링 데이터 타입 가드
+ */
 const isDiskMonitoringData = (data: unknown): data is DiskMonitoringData => {
   return typeof data === "object" && data !== null && "usedPercentage" in data;
 };
 
+/**
+ * System 및 Disk 데이터에서 메트릭 추출
+ */
 const extractMetricsFromSystemData = (
   systemData: SystemMonitoringData | null,
   diskData: DiskMonitoringData | null
@@ -45,6 +68,15 @@ const extractMetricsFromSystemData = (
   };
 };
 
+/**
+ * 모든 장비의 백그라운드 SSE 연결 훅
+ *
+ * 여러 장비의 실시간 모니터링 데이터를 동시에 수신하여 메트릭을 업데이트합니다.
+ * 연결 실패 시 지수 백오프 전략으로 재연결을 시도합니다.
+ *
+ * @param {number[]} equipmentIds - 모니터링할 장비 ID 목록
+ * @param {BackgroundSSECallbacks} callbacks - SSE 이벤트 콜백
+ */
 export const useAllEquipmentBackgroundSSE = (
   equipmentIds: number[],
   callbacks: BackgroundSSECallbacks
@@ -67,6 +99,9 @@ export const useAllEquipmentBackgroundSSE = (
 
     const eventSourceMap = new Map<number, EventSource>();
 
+    /**
+     * 특정 장비에 SSE 연결
+     */
     const connectToEquipment = (equipmentId: number) => {
       try {
         const url = `${BASE_URL}/monitoring/subscribe/equipment/${equipmentId}`;
@@ -133,6 +168,7 @@ export const useAllEquipmentBackgroundSSE = (
           }
         });
 
+        // 에러 처리 및 재연결
         eventSource.onerror = (error: Event) => {
           console.error(
             `[Equipment ${equipmentId}] SSE connection error:`,

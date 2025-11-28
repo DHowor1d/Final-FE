@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 서버 랙 시각화 컴포넌트 (Konva)
+ */
+
 import { Stage, Layer, Rect, Line, Text } from "react-konva";
 import { useMemo, Fragment, useCallback } from "react";
 import type { KonvaEventObject } from "konva/lib/Node";
@@ -11,14 +16,23 @@ import {
 } from "../utils/rackCalculation";
 import { rackLayout } from "../utils/rackLayout";
 
+/**
+ * 간단한 메트릭 정보
+ */
 interface SimpleMetrics {
   cpu: number;
   memory: number;
   disk: number;
 }
 
+/**
+ * 알림 상태 타입
+ */
 type AlertStatus = "normal" | "warning" | "critical";
 
+/**
+ * 랙 컴포넌트 props
+ */
 interface RackProps {
   devices: Equipments[];
   floatingDevice: FloatingDevice | null;
@@ -39,8 +53,16 @@ interface RackProps {
   allDeviceMetrics: Map<number, SimpleMetrics>;
 }
 
+/**
+ * 플로팅 장비 임시 ID
+ */
 const FLOATING_DEVICE_ID = -1;
 
+/**
+ * 서버 랙 시각화
+ * @param {RackProps} props - 랙 속성
+ * @returns 랙 컴포넌트
+ */
 function Rack({
   devices,
   floatingDevice,
@@ -73,6 +95,9 @@ function Rack({
     [floatingDevice, rackHeight, baseY, unitHeight]
   );
 
+  /**
+   * 장비 드래그 종료 처리
+   */
   const handleDeviceDragEnd = useCallback(
     (deviceId: number, newY: number) => {
       const draggedDevice = devices.find((d) => d.id === deviceId);
@@ -89,6 +114,9 @@ function Rack({
     [devices, onDeviceDragEnd, baseY, unitHeight]
   );
 
+  /**
+   * 마우스 이동 처리
+   */
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
     const stage = e.target.getStage();
     if (!stage) return;
@@ -97,12 +125,18 @@ function Rack({
     if (pos) onMouseMove(pos.y);
   };
 
+  /**
+   * 랙 클릭 처리
+   */
   const handleRackClick = () => {
     if (floatingDevice && floatingInfo) {
       onRackClick(floatingInfo.position);
     }
   };
 
+  /**
+   * 장비의 알림 상태 계산
+   */
   const getDeviceAlertStatus = (equipment: Equipments): AlertStatus => {
     const metrics = allDeviceMetrics.get(equipment.id);
     if (!metrics) return "normal";
@@ -147,6 +181,7 @@ function Rack({
         onClick={handleRackClick}
       >
         <Layer>
+          {/* 랙 본체 */}
           <Rect
             x={rackX}
             y={baseY}
@@ -157,6 +192,7 @@ function Rack({
             strokeWidth={1}
           />
 
+          {/* U 단위 그리드 및 라벨 */}
           {Array.from({ length: UNIT_COUNT + 1 }).map((_, i) => {
             const unitNumber = UNIT_COUNT - i;
             const yPos = baseY + i * unitHeight;
@@ -181,6 +217,7 @@ function Rack({
             );
           })}
 
+          {/* 배치된 장비들 */}
           {devices.map((device) => {
             const y = calculateDeviceY(
               device.startUnit,
@@ -225,6 +262,7 @@ function Rack({
             );
           })}
 
+          {/* 플로팅 장비 (드래그 중인 장비 미리보기) */}
           {floatingDevice && floatingInfo && (
             <Device
               device={{

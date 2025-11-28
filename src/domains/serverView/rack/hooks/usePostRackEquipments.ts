@@ -1,7 +1,16 @@
+/**
+ * @author 구희원
+ * @description 랙 장비 생성 훅
+ */
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postRackEquipment } from "../api/postRackEquipments";
 import type { PostEquipmentRequest } from "../api/postRackEquipments";
 
+/**
+ * 랙 장비 생성 훅
+ * @returns {UseMutationResult} 장비 생성 mutation
+ */
 export const usePostEquipment = () => {
   const queryClient = useQueryClient();
 
