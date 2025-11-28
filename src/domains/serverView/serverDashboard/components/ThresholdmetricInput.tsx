@@ -1,5 +1,13 @@
+/**
+ * @author 구희원
+ * @description 임계치 메트릭 입력 컴포넌트
+ */
+
 import { useState, useEffect } from "react";
 
+/**
+ * 임계치 메트릭 props
+ */
 interface ThresholdMetricProps {
   label: string;
   icon: string;
@@ -10,6 +18,18 @@ interface ThresholdMetricProps {
   onCriticalChange: (value: number) => void;
 }
 
+/**
+ * 임계치 메트릭 입력
+ * @param {ThresholdMetricProps} props - 메트릭 속성
+ * @param {string} props.label - 메트릭 라벨 (CPU, MEM, DISK)
+ * @param {string} props.icon - 아이콘 이미지 경로
+ * @param {number} props.warningValue - 경고 임계값
+ * @param {number} props.criticalValue - 위험 임계값
+ * @param {boolean} props.editMode - 편집 모드 여부
+ * @param {(value: number) => void} props.onWarningChange - 경고 임계값 변경 핸들러
+ * @param {(value: number) => void} props.onCriticalChange - 위험 임계값 변경 핸들러
+ * @returns 임계치 메트릭 입력 컴포넌트
+ */
 function ThresholdMetricInput({
   label,
   icon,
@@ -29,6 +49,7 @@ function ThresholdMetricInput({
   const [warningChanged, setWarningChanged] = useState(false);
   const [criticalChanged, setCriticalChanged] = useState(false);
 
+  // 경고 임계값 초기화
   useEffect(() => {
     if (!editingWarning) {
       setTempWarning(warningValue);
@@ -36,6 +57,7 @@ function ThresholdMetricInput({
     }
   }, [warningValue, editingWarning, label, tempWarning, warningChanged]);
 
+  // 위험 임계값 초기화
   useEffect(() => {
     if (!editingCritical) {
       setTempCritical(criticalValue);
@@ -43,20 +65,29 @@ function ThresholdMetricInput({
     }
   }, [criticalValue, editingCritical]);
 
+  /**
+   * 경고 임계값 클릭 핸들러
+   */
   const handleWarningClick = () => {
     if (!editMode) return;
     setEditingWarning(true);
     setTempWarning(warningValue);
-    setWarningChanged(false); // 클릭 시 리셋
+    setWarningChanged(false);
   };
 
+  /**
+   * 위험 임계값 클릭 핸들러
+   */
   const handleCriticalClick = () => {
     if (!editMode) return;
     setEditingCritical(true);
     setTempCritical(criticalValue);
-    setCriticalChanged(false); // 클릭 시 리셋
+    setCriticalChanged(false);
   };
 
+  /**
+   * 경고 임계값 저장
+   */
   const saveWarning = () => {
     if (!warningChanged) {
       setEditingWarning(false);
@@ -68,6 +99,7 @@ function ThresholdMetricInput({
         ? 0
         : Math.max(0, Math.min(100, tempWarning));
 
+    // 경고값이 위험값보다 클 수 없음
     if (criticalValue > 0 && value > criticalValue) {
       value = criticalValue;
     }
@@ -77,6 +109,9 @@ function ThresholdMetricInput({
     setWarningChanged(false);
   };
 
+  /**
+   * 위험 임계값 저장
+   */
   const saveCritical = () => {
     if (!criticalChanged) {
       setEditingCritical(false);
@@ -88,6 +123,7 @@ function ThresholdMetricInput({
         ? 0
         : Math.max(0, Math.min(100, tempCritical));
 
+    // 위험값이 경고값보다 작을 수 없음
     if (warningValue > 0 && value < warningValue) {
       value = warningValue;
     }
@@ -97,6 +133,9 @@ function ThresholdMetricInput({
     setCriticalChanged(false);
   };
 
+  /**
+   * 경고 임계값 입력 변경 핸들러
+   */
   const handleWarningChange = (val: string) => {
     setWarningChanged(true);
     if (val === "") {
@@ -109,6 +148,9 @@ function ThresholdMetricInput({
     }
   };
 
+  /**
+   * 위험 임계값 입력 변경 핸들러
+   */
   const handleCriticalChange = (val: string) => {
     setCriticalChanged(true);
     if (val === "") {
@@ -121,6 +163,9 @@ function ThresholdMetricInput({
     }
   };
 
+  /**
+   * 경고 임계값 키보드 이벤트 핸들러
+   */
   const handleWarningKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       saveWarning();
@@ -130,6 +175,9 @@ function ThresholdMetricInput({
     }
   };
 
+  /**
+   * 위험 임계값 키보드 이벤트 핸들러
+   */
   const handleCriticalKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       saveCritical();
@@ -147,7 +195,7 @@ function ThresholdMetricInput({
           : "border-slate-300/40 hover:border-white/30"
       }`}
     >
-      {/* Icon */}
+      {/* 아이콘 */}
       <div className={`w-5 h-5 rounded flex items-center justify-center`}>
         {typeof icon === "string" ? (
           <img src={icon} alt={label} className="w-3.5 h-3.5" />
@@ -156,12 +204,12 @@ function ThresholdMetricInput({
         )}
       </div>
 
-      {/* Label */}
+      {/* 라벨 */}
       <span className="text-white text-xs font-medium min-w-[2.5rem]">
         {label}
       </span>
 
-      {/* Warning Value */}
+      {/* 경고 임계값 */}
       <div className="flex items-center gap-1">
         {editingWarning ? (
           <input
@@ -195,10 +243,10 @@ function ThresholdMetricInput({
         )}
       </div>
 
-      {/* Separator */}
+      {/* 구분자 */}
       <span className="text-white text-sm">/</span>
 
-      {/* Critical Value */}
+      {/* 위험 임계값 */}
       <div className="flex items-center gap-1">
         {editingCritical ? (
           <input
@@ -230,7 +278,7 @@ function ThresholdMetricInput({
         )}
       </div>
 
-      {/* Unit */}
+      {/* 단위 */}
       <span className="text-white text-xs">%</span>
     </div>
   );

@@ -1,6 +1,14 @@
+/**
+ * @author 구희원
+ * @description 게이지 차트 컴포넌트 (ECharts)
+ */
+
 import { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 
+/**
+ * 게이지 차트 props
+ */
 interface GaugeChartProps {
   value: number;
   max?: number;
@@ -9,6 +17,16 @@ interface GaugeChartProps {
   unit?: string;
 }
 
+/**
+ * 게이지 차트
+ * @param {GaugeChartProps} props - 차트 속성
+ * @param {number} props.value - 현재 값
+ * @param {number} props.max - 최대값 (기본값: 100)
+ * @param {number} props.min - 최소값 (기본값: 0)
+ * @param {string} props.color - 차트 색상 (기본값: "#58D9F9")
+ * @param {string} props.unit - 단위 (기본값: "%")
+ * @returns 게이지 차트 컴포넌트
+ */
 function GaugeChart({
   value,
   max = 100,
@@ -21,6 +39,7 @@ function GaugeChart({
   useEffect(() => {
     setMounted(true);
   }, []);
+
   const option = {
     series: [
       {

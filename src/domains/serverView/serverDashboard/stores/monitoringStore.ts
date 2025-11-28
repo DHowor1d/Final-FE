@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 모니터링 데이터 전역 상태 관리 스토어
+ */
+
 import { create } from "zustand";
 import type {
   SystemMonitoringData,
@@ -5,19 +10,27 @@ import type {
   NetworkMonitoringData,
 } from "../types";
 
+/**
+ * 간단한 메트릭 정보
+ */
 export interface SimpleMetrics {
   cpu: number;
   memory: number;
   disk: number;
 }
 
-// 장비별 히스토리 저장 구조
+/**
+ * 장비별 히스토리 저장 구조
+ */
 interface DeviceHistory {
   systemHistory: SystemMonitoringData[];
   diskHistory: DiskMonitoringData[];
   networkHistory: NetworkMonitoringData[][];
 }
 
+/**
+ * 모니터링 상태
+ */
 interface MonitoringState {
   // 현재 선택된 장비
   selectedDeviceId: number | null;
@@ -49,8 +62,18 @@ interface MonitoringState {
   clearHistory: () => void;
 }
 
+/**
+ * 최대 히스토리 길이 (120개 데이터 포인트)
+ */
 const MAX_HISTORY_LENGTH = 120;
 
+/**
+ * 모니터링 데이터 전역 상태 관리 스토어
+ *
+ * - 선택된 장비의 실시간 모니터링 데이터 및 히스토리 관리
+ * - 모든 장비의 최신 메트릭 관리 (임계치 표시용)
+ * - 장비별 히스토리 캐싱으로 장비 전환 시 데이터 유지
+ */
 export const useMonitoringStore = create<MonitoringState>((set, get) => ({
   selectedDeviceId: null,
   systemData: null,
@@ -62,6 +85,9 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
   deviceMetricsMap: new Map(),
   deviceHistoryMap: new Map(),
 
+  /**
+   * 선택된 장비 ID 설정
+   */
   setSelectedDeviceId: (deviceId: number | null) => {
     set({ selectedDeviceId: deviceId });
 
@@ -79,6 +105,9 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
     }
   },
 
+  /**
+   * System 데이터 설정 및 히스토리 업데이트
+   */
   setSystemData: (data) =>
     set((state) => {
       const selectedDeviceId = state.selectedDeviceId;
@@ -107,6 +136,9 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
       };
     }),
 
+  /**
+   * Disk 데이터 설정 및 히스토리 업데이트
+   */
   setDiskData: (data) =>
     set((state) => {
       const selectedDeviceId = state.selectedDeviceId;
@@ -135,6 +167,9 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
       };
     }),
 
+  /**
+   * Network 데이터 설정 및 히스토리 업데이트
+   */
   setNetworkData: (data) =>
     set((state) => {
       const selectedDeviceId = state.selectedDeviceId;
@@ -174,6 +209,9 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
       };
     }),
 
+  /**
+   * 장비의 메트릭 설정 (백그라운드 모니터링용)
+   */
   setDeviceMetrics: (deviceId: number, metrics: SimpleMetrics) =>
     set((state) => {
       const newMap = new Map(state.deviceMetricsMap);
@@ -181,6 +219,9 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
       return { deviceMetricsMap: newMap };
     }),
 
+  /**
+   * 장비 히스토리 로드 (선택된 장비가 바뀔 때 호출)
+   */
   loadDeviceHistory: (deviceId: number) => {
     const state = get();
     const deviceHistory = state.deviceHistoryMap.get(deviceId);
@@ -219,6 +260,9 @@ export const useMonitoringStore = create<MonitoringState>((set, get) => ({
     }
   },
 
+  /**
+   * 모든 히스토리 초기화
+   */
   clearHistory: () =>
     set({
       systemHistory: [],

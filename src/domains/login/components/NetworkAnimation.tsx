@@ -1,5 +1,16 @@
+/**
+ * @author 구희원
+ * @description 네트워크 노드와 연결선을 애니메이션으로 시각화하는 컴포넌트
+ *
+ * - Framer Motion과 SVG를 활용하여 노드, 연결선, 입자 애니메이션 구현
+ * - 노드의 크기, 색상, 위치 및 애니메이션 속성 정의
+ * - 연결선(line)과 입자(particles) 애니메이션 포함
+ * - 네트워크 그래프와 유사한 시각적 효과 제공
+ */
+
 import { motion } from "framer-motion";
 
+/** 노드 설정 */
 const nodes = [
   { cx: 100, cy: 100, r: 35, color: "#22c55e", delay: 0.1, duration: 2.2 },
   { cx: 250, cy: 80, r: 28, color: "#10b981", delay: 0.2, duration: 2.5 },
@@ -11,6 +22,7 @@ const nodes = [
   { cx: 600, cy: 220, r: 40, color: "#22c55e", delay: 0.8, duration: 2.1 },
 ];
 
+/** 연결선 설정 */
 const lines = [
   { x1: 100, y1: 100, x2: 250, y2: 80, gradient: 1, delay: 0.1 },
   { x1: 100, y1: 100, x2: 200, y2: 225, gradient: 2, delay: 0.15 },
@@ -30,6 +42,7 @@ const lines = [
   { x1: 500, y1: 280, x2: 600, y2: 220, gradient: 2, delay: 0.85 },
 ];
 
+/** 입자 애니메이션 설정 */
 const particles = [
   { path: "M100,100 L250,80", color: "#22c55e", duration: 2.5, begin: "0s" },
   { path: "M100,100 L200,225", color: "#10b981", duration: 3, begin: "0.3s" },
@@ -41,6 +54,14 @@ const particles = [
   { path: "M500,280 L600,220", color: "#10b981", duration: 2.7, begin: "2.1s" },
 ];
 
+/**
+ * 네트워크 애니메이션 컴포넌트
+ *
+ * @returns {JSX.Element} 노드, 연결선, 입자 애니메이션이 포함된 SVG
+ *
+ * @example
+ * <NetworkAnimation />
+ */
 function NetworkAnimation() {
   return (
     <div className="relative flex items-start justify-center px-8 -mt-8">
@@ -50,6 +71,7 @@ function NetworkAnimation() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
+          {/* 선 그라데이션 정의 */}
           <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#22c55e" stopOpacity="0.2" />
             <stop offset="50%" stopColor="#22c55e" stopOpacity="0.6" />
@@ -69,6 +91,7 @@ function NetworkAnimation() {
           </filter>
         </defs>
 
+        {/* 연결선 렌더링 */}
         {lines.map((line, i) => (
           <motion.line
             key={`line-${i}`}
@@ -84,6 +107,7 @@ function NetworkAnimation() {
           />
         ))}
 
+        {/* 노드 렌더링 */}
         {nodes.map((node, i) => {
           const innerR = node.r * 0.63;
           const coreR = node.r * 0.31;
@@ -139,6 +163,7 @@ function NetworkAnimation() {
           );
         })}
 
+        {/* 입자 렌더링 */}
         {particles.map((particle, i) => (
           <motion.circle
             key={`particle-${i}`}

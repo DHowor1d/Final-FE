@@ -1,11 +1,6 @@
 /**
- * @author 김대호
- * @description 랙 관리 훅 - 랙 내부 장비의 배치, 이동, 삭제, 수정 등 전반적인 관리 기능 제공
- * 랙의 장비 목록을 조회하고, 장비 추가/삭제/이동/수정 API 호출 처리
- * 드래그&드롭으로 장비 배치, U 단위 차지 계산 및 충돌 검사
- * 임시 장비 상태 관리로 실시간 UI 업데이트 및 API 호출 분리
- * 장비 이름 편집 모드 관리 및 키보드 이벤트 처리 (Enter, Escape)
- * 러 상태 초기화로 랙 UI 재렌더링 트리거 기능
+ * @author 구희원
+ * @description 랙 관리 훅 (장비 배치, 드래그, 삭제 등 전체 로직)
  */
 
 import { useState, useCallback, useMemo } from "react";
@@ -19,6 +14,9 @@ import { useUpdateRackEquipments } from "./useUpdateRackEquipments";
 import type { GetRackEquipmentsParams } from "../api/getRackEquipments";
 import type { PostEquipmentRequest } from "../api/postRackEquipments";
 
+/**
+ * 랙 매니저 props
+ */
 interface UseRackManagerProps {
   rackId: number;
   params?: GetRackEquipmentsParams;
@@ -27,10 +25,13 @@ interface UseRackManagerProps {
 }
 
 /**
- * @function useRackManager
- * @description 랙 관리 훅 - 랙 내부 장비의 전반적인 상태와 동작 관리
- * @param {UseRackManagerProps} props - 랙 ID, 파라미터, 뷰 모드, 서버실 ID
- * @returns {Object} 장비 목록, 랙 정보, 이벤트 핸들러 함수들
+ * 랙 관리 훅
+ * @param {UseRackManagerProps} props - 랙 매니저 속성
+ * @param {number} props.rackId - 랙 ID
+ * @param {GetRackEquipmentsParams} props.params - 장비 조회 파라미터
+ * @param {boolean} props.frontView - 앞면/뒷면 뷰 상태
+ * @param {number} props.serverRoomId - 서버룸 ID
+ * @returns 랙 관리 상태 및 핸들러 함수들
  */
 export function useRackManager({
   rackId,
@@ -47,28 +48,33 @@ export function useRackManager({
     new Map()
   );
 
-  //GET
+  // GET - 장비 목록 조회
   const { equipments, rack, isLoading, error } = useGetRackEquipments(
     rackId || 0,
     params
   );
 
-  //POST
+  // POST - 장비 생성 및 배치
   const { mutate: postEquipment } = usePostEquipment();
   const { mutate: postPlaceEquipments } = usePostPlaceEquipments();
 
-  //DELETE
+  // DELETE - 장비 삭제
   const { mutate: deleteEquipment } = useDeleteEquipments();
 
-  //UPDATE
+  // UPDATE - 장비 수정
   const { mutate: updateEquipment } = useUpdateRackEquipments();
 
+  /**
+   * 설치된 장비 목록 (서버 데이터 + 임시 장비)
+   */
   const installedDevices = useMemo(() => {
     const devices = [...(equipments || []), ...tempDevices];
     return devices;
   }, [equipments, tempDevices]);
 
-  // 카드 클릭 핸들러
+  /**
+   * 장비 카드 클릭 핸들러
+   */
   const handleCardClick = useCallback((card: EquipmentCard) => {
     setFloatingDevice({
       card,
@@ -76,12 +82,16 @@ export function useRackManager({
     });
   }, []);
 
-  // 마우스 이동
+  /**
+   * 마우스 이동 핸들러
+   */
   const handleMouseMove = useCallback((mouseY: number) => {
     setFloatingDevice((prev) => (prev ? { ...prev, mouseY } : null));
   }, []);
 
-  // 드래그 종료 핸들러
+  /**
+   * 장비 드래그 종료 핸들러
+   */
   const handleDeviceDragEnd = useCallback(
     (deviceId: number, newPosition: number) => {
       const draggedDevice = installedDevices.find((d) => d.id === deviceId);
@@ -119,7 +129,9 @@ export function useRackManager({
     [updateEquipment, rackId, installedDevices]
   );
 
-  // 랙 클릭 핸들러
+  /**
+   * 랙 클릭 핸들러 (장비 배치)
+   */
   const handleRackClick = useCallback(
     (position: number) => {
       setFloatingDevice((prevFloating) => {
@@ -136,7 +148,7 @@ export function useRackManager({
           return prevFloating;
         }
 
-        //드롭다운에서 선택한 기존 장비인 경우
+        // 드롭다운에서 선택한 기존 장비인 경우
         if (prevFloating.card.id) {
           postPlaceEquipments({
             rackId,
@@ -149,6 +161,7 @@ export function useRackManager({
           return null;
         }
 
+        // 새 장비 생성 (임시)
         const tempId = Date.now();
         const newDevice: Equipments = {
           id: tempId,
@@ -189,6 +202,9 @@ export function useRackManager({
     [frontView, editingDeviceId, installedDevices, postPlaceEquipments, rackId]
   );
 
+  /**
+   * 장비명 변경 핸들러
+   */
   const handleDeviceNameChange = useCallback(
     (deviceId: number, name: string) => {
       setTempDeviceName((prev) => {
@@ -200,7 +216,9 @@ export function useRackManager({
     []
   );
 
-  // Enter 누름 → 이름 확정 & 배치 → 그 다음 서버 요청
+  /**
+   * 장비명 확정 핸들러 (Enter 또는 확인 버튼)
+   */
   const handleDeviceNameConfirm = useCallback(
     (device: Equipments, inputName?: string) => {
       const name = inputName ?? tempDeviceName.get(device.id) ?? "";
@@ -251,6 +269,9 @@ export function useRackManager({
     [rackId, postEquipment, tempDeviceName]
   );
 
+  /**
+   * 장비명 입력 취소 핸들러 (ESC 또는 취소 버튼)
+   */
   const handleDeviceNameCancel = useCallback((deviceId: number) => {
     setTempDevices((prevDevices) =>
       prevDevices.filter((device) => device.id !== deviceId)
@@ -263,7 +284,9 @@ export function useRackManager({
     setEditingDeviceId(null);
   }, []);
 
-  //장비 삭제 함수 추가
+  /**
+   * 장비 삭제 핸들러
+   */
   const handleDeviceDelete = useCallback(
     (deviceId: number) => {
       deleteEquipment({ id: deviceId, rackId });
@@ -271,6 +294,9 @@ export function useRackManager({
     [deleteEquipment, rackId]
   );
 
+  /**
+   * 임시 장비명 조회
+   */
   const getDeviceName = useCallback(
     (deviceId: number) => {
       return tempDeviceName.get(deviceId) || "";

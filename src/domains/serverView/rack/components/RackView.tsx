@@ -18,6 +18,9 @@ import { useEquipmentSSE } from "../../serverDashboard/hooks/useEquipmentSSE";
 import { useAllEquipmentBackgroundSSE } from "../../serverDashboard/hooks/useAllEquipmentBackgroundSSE";
 import { useAuthStore } from "@/domains/login/store/useAuthStore";
 
+/**
+ * 랙 뷰 props
+ */
 interface RackViewProps {
   onClose?: () => void;
   rackName?: string;
@@ -50,6 +53,9 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
   const { user } = useAuthStore();
   const view = user?.role === "VIEWER";
 
+  /**
+   * 랙 이름에서 ID 추출
+   */
   const rackId = useMemo(() => {
     if (!rackName) return undefined;
     const parts = rackName.split("-");
@@ -63,11 +69,17 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     frontView,
   });
 
+  /**
+   * 선택된 장비 정보
+   */
   const selectedEquipment = useMemo(
     () => rackManager.equipments?.find((eq) => eq.id === selectedDevice?.id),
     [rackManager.equipments, selectedDevice?.id]
   );
 
+  /**
+   * 모니터링 가능한 장비 ID 목록 (SERVER, STORAGE만)
+   */
   const selectableEquipmentIds = useMemo(
     () =>
       rackManager.equipments
@@ -79,13 +91,22 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     [rackManager.equipments]
   );
 
+  /**
+   * 백그라운드 SSE 대상 장비 ID 목록
+   */
   const backgroundSSEEquipmentIds = useMemo(() => {
-    if (rackManager.isLoading || selectableEquipmentIds.length === 0) {
-      return [];
-    }
-    return selectableEquipmentIds.filter((id) => id !== selectedDevice?.id);
-  }, [rackManager.isLoading, selectableEquipmentIds, selectedDevice?.id]);
+    const shouldStart =
+      !rackManager.isLoading && selectableEquipmentIds.length > 0;
 
+    if (shouldStart) {
+      return selectableEquipmentIds;
+    }
+    return [];
+  }, [rackManager.isLoading, selectableEquipmentIds]);
+
+  /**
+   * 백그라운드 SSE 콜백
+   */
   const backgroundCallbacks = useCallback(
     () => ({
       onMetricsUpdate: setDeviceMetrics,
@@ -99,6 +120,9 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     [rackId, setDeviceMetrics]
   );
 
+  /**
+   * 선택된 장비 SSE 콜백
+   */
   const equipmentCallbacks = useCallback(
     () => ({
       onSystemData: setSystemData,
@@ -145,6 +169,9 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
 
   const displayRackName = rackManager.rack?.rackName || rackName || "N/A";
 
+  /**
+   * 장비 클릭 핸들러
+   */
   const handleDeviceClick = (deviceId: number, deviceName: string) => {
     const equipment = rackManager.equipments?.find((eq) => eq.id === deviceId);
     if (
@@ -157,10 +184,16 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
     }
   };
 
+  /**
+   * 대시보드 닫기 핸들러
+   */
   const handleDashboardClose = () => {
     setDashboardOpen(false);
   };
 
+  /**
+   * 사이드바 클릭 핸들러
+   */
   const handleSidebarClick = () => {
     if (dashboardOpen) {
       handleDashboardClose();
@@ -189,6 +222,7 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
 
   return (
     <div className="h-full flex text-white gap-2 p-2">
+      {/* 서버 대시보드 영역 */}
       <div
         className="flex-[2] overflow-hidden relative"
         onClick={handleSidebarClick}
@@ -204,8 +238,10 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
         />
       </div>
 
+      {/* 랙 뷰 영역 */}
       <div className="flex-1 overflow-visible relative">
         <div className="h-full flex flex-col bg-[#404452]/70 backdrop-blur-md border border-slate-300/40 rounded-xl">
+          {/* 헤더 */}
           <header className="flex justify-between items-center px-6 py-4 border-b border-slate-300/40 flex-shrink-0">
             <div className="flex-1">
               <RackHeader rackName={displayRackName} />
@@ -227,6 +263,7 @@ function RackView({ rackName, serverRoomId, onClose }: RackViewProps) {
             </div>
           </header>
 
+          {/* 메인 콘텐츠 */}
           <div className="flex flex-1 min-h-0 overflow-visible">
             <Sidebar
               onCardClick={rackManager.handleCardClick}

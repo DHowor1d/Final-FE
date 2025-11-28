@@ -1,6 +1,14 @@
+/**
+ * @author 구희원
+ * @description 장비 상세 정보 수정 API
+ */
+
 import client from "@/api/client";
 import type { UpdateEquipmentRequest } from "../types";
 
+/**
+ * 장비 상세 정보
+ */
 export interface EquipmentDetail {
   id: number;
   equipmentName: string;
@@ -37,12 +45,21 @@ export interface EquipmentDetail {
   diskThresholdCritical: number;
 }
 
+/**
+ * 장비 수정 API 응답
+ */
 export interface UpdateEquipmentResponse {
   status_code: number;
   status_message: string;
   result: EquipmentDetail;
 }
 
+/**
+ * 장비 상세 정보 수정
+ * @param {number} id - 수정할 장비 ID
+ * @param {UpdateEquipmentRequest} data - 수정할 장비 정보
+ * @returns {Promise<UpdateEquipmentResponse>} 수정된 장비 정보
+ */
 export const updateEquipment = async (
   id: number,
   data: UpdateEquipmentRequest
