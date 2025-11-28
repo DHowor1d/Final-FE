@@ -1,3 +1,11 @@
+/**
+ * @author 최산하
+ * @description 장비 라이브러리 컴포넌트 - 배치 가능한 장비 목록을 제공하고 드래그 앤 드롭 기능을 지원
+ * 서버 랙, 냉각기, 도어 등 서버실 구성에 필요한 3D 장비 템플릿 데이터(EQUIPMENT_LIBRARY) 관리
+ * @dnd-kit/core의 useDraggable 훅을 사용하여 장비 아이템의 드래그 소스(Source) 기능 구현
+ * 각 장비의 아이콘, 이름, 기본 속성(크기, 색상)을 시각적으로 렌더링
+ * 마우스 호버 및 드래그 상태에 따른 직관적인 UI 인터랙션 제공
+ */
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { Asset, UHeight } from '../../types';
