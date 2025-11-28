@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 랙 장비 수정 훅
+ */
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   updateRackEquipments,
@@ -5,12 +10,19 @@ import {
 } from "../api/updateRackEquipments";
 import type { RackEquipmentsResult } from "../types";
 
+/**
+ * 랙 장비 API 응답
+ */
 interface RackEquipmentResponse {
   status_code: number;
   status_message: string;
   result: RackEquipmentsResult;
 }
 
+/**
+ * 랙 장비 수정 훅
+ * @returns {UseMutationResult} 장비 수정 mutation
+ */
 export const useUpdateRackEquipments = () => {
   const queryClient = useQueryClient();
 
@@ -25,6 +37,7 @@ export const useUpdateRackEquipments = () => {
       return updateRackEquipments(id, data);
     },
 
+    // Optimistic Update
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({
         queryKey: ["rackEquipments", data.rackId],
@@ -59,6 +72,8 @@ export const useUpdateRackEquipments = () => {
     },
 
     retry: false,
+
+    // 성공 시 쿼리 무효화
     onSuccess: (_, variables) => {
       if (variables.data?.rackId) {
         queryClient.invalidateQueries({
@@ -69,6 +84,8 @@ export const useUpdateRackEquipments = () => {
       }
       console.log("장비 수정 성공");
     },
+
+    // 에러 발생 시 롤백
     onError: (error, _, context) => {
       console.error("장비 수정 실패", error);
       if (context?.previousData) {

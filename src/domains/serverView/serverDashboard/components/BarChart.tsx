@@ -1,12 +1,23 @@
+/**
+ * @author 구희원
+ * @description 막대 차트 컴포넌트 (ECharts)
+ */
+
 import ReactECharts from "echarts-for-react";
 import { useEffect, useState } from "react";
 
+/**
+ * 시리즈 데이터
+ */
 interface SeriesData {
   name: string;
   data: (number | null)[];
   color: string;
 }
 
+/**
+ * 막대 차트 props
+ */
 interface BarChartProps {
   xAxisData: string[];
   series: SeriesData[];
@@ -15,6 +26,9 @@ interface BarChartProps {
   stacked?: boolean;
 }
 
+/**
+ * 툴팁 파라미터
+ */
 interface TooltipParams {
   axisValue: string;
   marker: string;
@@ -22,6 +36,16 @@ interface TooltipParams {
   value: number | string;
 }
 
+/**
+ * 막대 차트
+ * @param {BarChartProps} props - 차트 속성
+ * @param {string[]} props.xAxisData - X축 데이터
+ * @param {SeriesData[]} props.series - 시리즈 데이터
+ * @param {string} props.yAxisUnit - Y축 단위 (기본값: "%")
+ * @param {string} props.height - 차트 높이 (기본값: "100%")
+ * @param {boolean} props.stacked - 스택형 차트 여부 (기본값: true)
+ * @returns 막대 차트 컴포넌트
+ */
 function BarChart({
   xAxisData,
   series,

@@ -1,7 +1,15 @@
+/**
+ * @author 구희원
+ * @description 버튼 플레이스홀더 컴포넌트 (초기화, 저장, 편집 토글)
+ */
+
 import ResetIcon from "../assets/reset.svg";
 import CheckIcon from "../assets/check.svg";
 import Button from "./Button";
 
+/**
+ * 버튼 플레이스홀더 props
+ */
 interface ButtonPlaceholderProps {
   editMode: boolean;
   onReset: () => void;
@@ -10,6 +18,16 @@ interface ButtonPlaceholderProps {
   isLoading?: boolean;
 }
 
+/**
+ * 버튼 플레이스홀더
+ * @param {ButtonPlaceholderProps} props - 버튼 플레이스홀더 속성
+ * @param {boolean} props.editMode - 편집 모드 여부
+ * @param {() => void} props.onReset - 초기화 핸들러
+ * @param {() => void} props.onSave - 저장 핸들러
+ * @param {() => void} props.onToggleEdit - 편집 모드 토글 핸들러
+ * @param {boolean} props.isLoading - 로딩 상태
+ * @returns 버튼 플레이스홀더 컴포넌트
+ */
 function ButtonPlaceholder({
   editMode,
   onReset,

@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 랙 편집 사이드바 컴포넌트
+ */
+
 import { useState } from "react";
 import Tools from "./Tools";
 import Dropdown from "./Dropdown";
@@ -5,11 +10,21 @@ import type { EquipmentCard, UnassignedEquipment } from "../types";
 import { useUnassignedEquipments } from "../hooks/useGetUnassignedEquipments";
 import { deviceImageMap } from "../utils/deviceImageMap";
 
+/**
+ * 사이드바 props
+ */
 interface SidebarProps {
   onCardClick: (card: EquipmentCard) => void;
   isOpen: boolean;
 }
 
+/**
+ * 랙 편집 사이드바
+ * @param {SidebarProps} props - 사이드바 속성
+ * @param {(card: EquipmentCard) => void} props.onCardClick - 장비 카드 클릭 핸들러
+ * @param {boolean} props.isOpen - 사이드바 열림 상태
+ * @returns 사이드바 컴포넌트
+ */
 function Sidebar({ onCardClick, isOpen }: SidebarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0 });
@@ -20,6 +35,9 @@ function Sidebar({ onCardClick, isOpen }: SidebarProps) {
       enabled: dropdownOpen,
     });
 
+  /**
+   * 컨텍스트 메뉴(우클릭) 핸들러
+   */
   const handleContextMenu = (e: React.MouseEvent, card: EquipmentCard) => {
     e.preventDefault();
     e.stopPropagation();
@@ -40,15 +58,24 @@ function Sidebar({ onCardClick, isOpen }: SidebarProps) {
     setDropdownOpen(true);
   };
 
+  /**
+   * 드롭다운 장비 선택 핸들러
+   */
   const handleDropdownSelect = (item: EquipmentCard) => {
     onCardClick(item);
     setDropdownOpen(false);
   };
 
+  /**
+   * 드롭다운 닫기 핸들러
+   */
   const handleDropdownClose = () => {
     setDropdownOpen(false);
   };
 
+  /**
+   * 선택된 타입에 맞는 미할당 장비 필터링
+   */
   const getFilteredEquipments = (): EquipmentCard[] => {
     if (!selectedCard || !data?.allEquipments) {
       return [];

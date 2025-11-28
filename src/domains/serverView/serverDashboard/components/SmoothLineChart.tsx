@@ -1,6 +1,14 @@
+/**
+ * @author 구희원
+ * @description 부드러운 라인 차트 컴포넌트 (ECharts)
+ */
+
 import { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 
+/**
+ * 시리즈 데이터
+ */
 interface SeriesData {
   name: string;
   data: (number | null)[];
@@ -11,6 +19,9 @@ interface SeriesData {
   lineType?: "solid" | "dashed" | "dotted";
 }
 
+/**
+ * 부드러운 라인 차트 props
+ */
 interface SmoothLineChartProps {
   xAxisData: string[];
   series: SeriesData[];
@@ -18,6 +29,9 @@ interface SmoothLineChartProps {
   height?: string;
 }
 
+/**
+ * 툴팁 파라미터
+ */
 interface TooltipParams {
   axisValue: string;
   marker: string;
@@ -25,6 +39,15 @@ interface TooltipParams {
   value: number | string;
 }
 
+/**
+ * 부드러운 라인 차트
+ * @param {SmoothLineChartProps} props - 차트 속성
+ * @param {string[]} props.xAxisData - X축 데이터
+ * @param {SeriesData[]} props.series - 시리즈 데이터
+ * @param {string} props.yAxisUnit - Y축 단위
+ * @param {string} props.height - 차트 높이 (기본값: "100%")
+ * @returns 부드러운 라인 차트 컴포넌트
+ */
 function SmoothLineChart({
   xAxisData,
   series,

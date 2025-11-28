@@ -1,6 +1,14 @@
+/**
+ * @author 구희원
+ * @description 영역 채움 라인 차트 컴포넌트 (ECharts)
+ */
+
 import ReactECharts from "echarts-for-react";
 import { useEffect, useState } from "react";
 
+/**
+ * 시리즈 데이터
+ */
 interface SeriesData {
   name: string;
   data: number[] | null;
@@ -10,6 +18,9 @@ interface SeriesData {
   lineType?: "solid" | "dashed" | "dotted";
 }
 
+/**
+ * 영역 라인 차트 props
+ */
 interface AreaLineChartProps {
   xAxisData: string[];
   series: SeriesData[];
@@ -18,6 +29,9 @@ interface AreaLineChartProps {
   showToolbox?: boolean;
 }
 
+/**
+ * 툴팁 파라미터
+ */
 interface TooltipParams {
   axisValue: string;
   marker: string;
@@ -26,6 +40,16 @@ interface TooltipParams {
   color: string;
 }
 
+/**
+ * 영역 채움 라인 차트
+ * @param {AreaLineChartProps} props - 차트 속성
+ * @param {string[]} props.xAxisData - X축 데이터
+ * @param {SeriesData[]} props.series - 시리즈 데이터
+ * @param {string} props.yAxisUnit - Y축 단위
+ * @param {string} props.height - 차트 높이
+ * @param {boolean} props.showToolbox - 툴박스 표시 여부
+ * @returns 영역 라인 차트 컴포넌트
+ */
 function AreaLineChart({
   xAxisData,
   series,

@@ -1,8 +1,23 @@
+/**
+ * @author 구희원
+ * @description 랙 헤더 컴포넌트
+ */
+
+/**
+ * 랙 헤더 props
+ */
 interface RackHeaderProps {
   rackName?: string;
   onClose?: () => void;
 }
 
+/**
+ * 랙 헤더
+ * @param {RackHeaderProps} props - 헤더 속성
+ * @param {string} props.rackName - 랙 이름 (기본값: "N/A")
+ * @param {() => void} props.onClose - 닫기 버튼 클릭 핸들러
+ * @returns 랙 헤더 컴포넌트
+ */
 function RackHeader({ rackName = "N/A", onClose }: RackHeaderProps) {
   return (
     <div className="flex items-center justify-between w-full">
