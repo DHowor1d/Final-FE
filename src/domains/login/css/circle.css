@@ -1,6 +1,20 @@
+/**
+ * @author 구희원
+ * @description Tailwind CSS 기반 커스텀 트윙클(Twinkle) 애니메이션 유틸리티
+ *
+ * - opacity 변화를 통해 요소에 천천히 깜박이는 효과를 적용
+ * - 3가지 속도 옵션 제공: 느림(slow), 중간(medium), 빠름(fast)
+ * - Tailwind @layer utilities를 활용하여 재사용 가능한 클래스 정의
+ */
+
 @import "tailwindcss";
 
 @layer utilities {
+  /** 
+   * @description 트윙클 애니메이션 키프레임
+   * - 0%와 100%: opacity 0.5
+   * - 30%: opacity 0.3
+   */
   @keyframes twinkle {
     0%,
     100% {
@@ -11,14 +25,32 @@
     }
   }
 
+  /**
+   * @description 느린 트윙클 애니메이션
+   * - duration: 8초
+   * - ease-in-out
+   * - 무한 반복
+   */
   .animate-twinkle-slow {
     @apply animate-[twinkle_8s_ease-in-out_infinite];
   }
 
+  /**
+   * @description 중간 속도 트윙클 애니메이션
+   * - duration: 6초
+   * - ease-in-out
+   * - 무한 반복
+   */
   .animate-twinkle-medium {
     @apply animate-[twinkle_6s_ease-in-out_infinite];
   }
 
+  /**
+   * @description 빠른 트윙클 애니메이션
+   * - duration: 4초
+   * - ease-in-out
+   * - 무한 반복
+   */
   .animate-twinkle-fast {
     @apply animate-[twinkle_4s_ease-in-out_infinite];
   }
