@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import { useState } from "react";
 import { useDeleteServerRoom } from "./useServerRoomQueries";
 import type { ServerRoom } from "../types";

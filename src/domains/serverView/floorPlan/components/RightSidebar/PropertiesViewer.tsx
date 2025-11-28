@@ -1,3 +1,11 @@
+/**
+ * @author 최산하
+ * @description 속성 뷰어 컴포넌트 - 선택된 자산의 상세 정보를 읽기 전용으로 표시
+ * 실시간 상태(정상/주의/위험)를 시각적 인디케이터(색상 점)로 표현
+ * 온도 등 센서 데이터 및 자산 ID, 타입 등 기본 메타데이터 제공
+ * 랙(Rack) 타입의 경우 내부 마운트 장비를 확인할 수 있는 상세 모달 연동(openRackModal) 지원
+ */
+
 import { useFloorPlanStore } from '../../store/floorPlanStore';
 import type { Asset } from '../../types';
 import { useBabylonDatacenterStore } from '@/domains/serverView/view3d/stores/useBabylonDatacenterStore';

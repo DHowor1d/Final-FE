@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 자산 회전 툴바 - 편집 모드에서 단일 자산 선택 시 하단에 플로팅되는 회전 제어 패널
+ * 선택된 자산을 시계(CW) 또는 반시계(CCW) 방향으로 90도씩 회전시키는 기능 제공
+ * 'edit' 모드이면서 '단일 선택' 상태일 때만 조건부 렌더링되어 작업 화면의 간섭 최소화
+ * Zustand 스토어의 updateAsset 액션을 호출하여 회전각(Rotation) 상태를 즉시 업데이트
+ */
 import React from 'react';
 import { useFloorPlanStore, updateAsset } from '../store/floorPlanStore';
 import { RotateCw, RotateCcw } from 'lucide-react';

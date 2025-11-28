@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import { flexRender } from '@tanstack/react-table';
 import type {
   Table as TanStackTable,

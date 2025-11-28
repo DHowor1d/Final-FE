@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 플로어 플랜 전역 상태 관리 스토어 - 2D 평면도 뷰어 및 에디터의 핵심 비즈니스 로직 담당
+ * Zustand와 Zundo(temporal 미들웨어)를 활용하여 자산 상태, 그리드 설정, 실행 취소(Undo)/다시 실행(Redo) 기능 구현
+ * 2D 자산(Asset)과 3D 장비(Equipment) 데이터 간의 변환 로직 및 CRUD API 연동을 통한 데이터 동기화 처리
+ * 자산 배치, 다중 선택/그룹화, 줌 인/아웃, 히트맵 뷰 모드 전환 등 사용자 인터랙션 전반을 제어
+ */
 import { create, type StateCreator } from 'zustand';
 import { temporal } from 'zundo';
 import { useStore } from 'zustand';

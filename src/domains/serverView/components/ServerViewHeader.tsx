@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import { useNavigate, useLocation } from "react-router-dom";
 import { useStore } from "zustand";
 import { useState, useRef, useEffect } from "react";

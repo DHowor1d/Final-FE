@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import { EQUIPMENT_PALETTE } from '../constants/config';
 import type { EquipmentType } from '../types';
 import { EquipmentPalette } from '@/shared/equipment';

@@ -1,4 +1,11 @@
-
+/**
+ * @author 최산하
+ * @description 히트맵 시각화 레이어 컴포넌트 - 서버실 내 온도 및 전력 분포를 직관적인 열지도(Heatmap) 형태로 표현
+ * 자산의 센서 데이터(온도, 전력량)를 정규화하여 시각적 가중치(반지름, 투명도)로 변환하는 로직 수행
+ * React-Konva의 Circle과 RadialGradient를 활용하여 부드러운 그라데이션 효과 구현
+ * globalCompositeOperation="lighter" 속성을 적용하여 데이터 중첩 구역(Hotspot)을 자연스럽게 강조
+ * viewMode에 따라 온도(Red) 및 전력(Yellow) 테마를 동적으로 전환
+ */
 import React, { useMemo } from 'react';
 import { Group, Circle } from 'react-konva';
 import { useFloorPlanStore } from '../store/floorPlanStore';

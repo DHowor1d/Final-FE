@@ -1,4 +1,11 @@
-
+/**
+ * @author 최산하
+ * @description 플로어 플랜 뷰의 시각화 옵션 및 레이어 가시성 제어 패널
+ * 랙 이름, 상태 표시등, 온도, 전력 등 세부 정보의 표시 여부 토글(Toggle) 기능 제공
+ * Floor(바닥), Wall(벽), Overhead(천장) 등 자산 레이어별 보기/숨기기 제어
+ * Zustand 스토어(useFloorPlanStore)와 연동하여 사용자 설정 변경 시 실시간 렌더링 업데이트
+ * 설정 항목을 카테고리별(기본, 상태, 전문 정보 등)로 그룹화하여 직관적인 UI 구성
+ */
 import { useFloorPlanStore, setDisplayOptions, toggleLayerVisibility } from '../../store/floorPlanStore.ts';
 import type { DisplayOptionsType, AssetLayer } from '../../types';
 

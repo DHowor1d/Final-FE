@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import { Search } from 'lucide-react'; 
 import {
   EQUIPMENT_TYPE_OPTIONS,
