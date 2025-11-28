@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 차트 데이터 빌더 유틸리티
+ */
+
 import {
   generateTimeLabels,
   bytesToMbps,
@@ -6,6 +11,9 @@ import {
 import { CHART_CONFIG } from "../constants";
 import type { NetworkMonitoringData } from "../types";
 
+/**
+ * 차트 시리즈 데이터
+ */
 interface ChartSeries {
   name: string;
   data: number[];
@@ -15,6 +23,9 @@ interface ChartSeries {
   averageColor?: string;
 }
 
+/**
+ * 시스템 데이터
+ */
 interface SystemData {
   cpuIdle: number;
   usedMemoryPercentage: number;
@@ -30,11 +41,17 @@ interface SystemData {
   cpuSteal?: number;
 }
 
+/**
+ * 디스크 데이터
+ */
 interface DiskData {
   usedPercentage: number;
   usedInodePercentage?: number;
 }
 
+/**
+ * 히스토리 레코드
+ */
 export interface HistoryRecord {
   cpuUser?: number;
   cpuSystem?: number;
@@ -55,12 +72,18 @@ export interface HistoryRecord {
   [key: string]: unknown;
 }
 
+/**
+ * 집계된 네트워크 데이터
+ */
 interface AggregatedNetwork {
   rx: number[];
   tx: number[];
   timeLabels: string[];
 }
 
+/**
+ * 차트 데이터 상태
+ */
 interface ChartDataState {
   systemData: SystemData | null;
   diskData: DiskData | null;
@@ -69,6 +92,9 @@ interface ChartDataState {
   networkHistory: NetworkMonitoringData[][];
 }
 
+/**
+ * 차트 데이터 결과
+ */
 interface ChartDataResult {
   timeLabels: string[];
   networkTimeLabels: string[];
@@ -86,7 +112,9 @@ interface ChartDataResult {
 
 const { MAX_POINTS, COLORS } = CHART_CONFIG;
 
-// 공통 series 생성 헬퍼
+/**
+ * 시리즈 생성 옵션
+ */
 interface CreateSeriesOptions {
   name: string;
   data: number[];
@@ -96,6 +124,9 @@ interface CreateSeriesOptions {
   averageColor?: string;
 }
 
+/**
+ * 차트 시리즈 생성 헬퍼
+ */
 const createSeries = ({
   name,
   data,
@@ -114,7 +145,9 @@ const createSeries = ({
   }),
 });
 
-// 빈 차트 데이터 결과
+/**
+ * 빈 차트 데이터
+ */
 const EMPTY_CHART_DATA: ChartDataResult = {
   timeLabels: [],
   networkTimeLabels: [],
@@ -130,7 +163,9 @@ const EMPTY_CHART_DATA: ChartDataResult = {
   inodeUsage: [],
 };
 
-// CPU 모드 series 생성
+/**
+ * CPU 모드 시리즈 생성
+ */
 const buildCpuModes = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "User",
@@ -159,7 +194,9 @@ const buildCpuModes = (history: HistoryRecord[]): ChartSeries[] => [
   }),
 ];
 
-// Load Average series 생성
+/**
+ * Load Average 시리즈 생성
+ */
 const buildLoadAverage = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "1분 평균",
@@ -178,7 +215,9 @@ const buildLoadAverage = (history: HistoryRecord[]): ChartSeries[] => [
   }),
 ];
 
-// Memory & Swap series 생성
+/**
+ * Memory & Swap 시리즈 생성
+ */
 const buildMemorySwap = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "메모리",
@@ -194,7 +233,9 @@ const buildMemorySwap = (history: HistoryRecord[]): ChartSeries[] => [
   }),
 ];
 
-// Network Bandwidth series 생성
+/**
+ * Network Bandwidth 시리즈 생성
+ */
 const buildNetworkBandwidth = (
   aggregated: AggregatedNetwork
 ): ChartSeries[] => [
@@ -210,7 +251,9 @@ const buildNetworkBandwidth = (
   }),
 ];
 
-// CPU Overhead series 생성
+/**
+ * CPU Overhead 시리즈 생성
+ */
 const buildCpuOverhead = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "I/O Wait (%)",
@@ -230,7 +273,9 @@ const buildCpuOverhead = (history: HistoryRecord[]): ChartSeries[] => [
   }),
 ];
 
-// Disk I/O series 생성
+/**
+ * Disk I/O 시리즈 생성
+ */
 const buildDiskIO = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "읽기",
@@ -244,7 +289,9 @@ const buildDiskIO = (history: HistoryRecord[]): ChartSeries[] => [
   }),
 ];
 
-// Inode Usage series 생성
+/**
+ * Inode Usage 시리즈 생성
+ */
 const buildInodeUsage = (history: HistoryRecord[]): ChartSeries[] => [
   createSeries({
     name: "Disk 사용률",
@@ -264,7 +311,14 @@ const buildInodeUsage = (history: HistoryRecord[]): ChartSeries[] => [
   }),
 ];
 
-// 메인: 차트 데이터 빌드
+/**
+ * 차트 데이터 빌드
+ *
+ * 모니터링 데이터 히스토리를 차트에 표시할 형식으로 변환합니다.
+ *
+ * @param {ChartDataState} state - 차트 데이터 상태
+ * @returns {ChartDataResult} 변환된 차트 데이터
+ */
 export const buildChartData = ({
   systemData,
   diskData,

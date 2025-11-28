@@ -1,3 +1,11 @@
+/**
+ * @author 김대호
+ * @description 서버실 및 데이터센터 관리를 위한 React Query hooks
+ * 데이터센터와 서버실의 CRUD 작업을 처리하는 커스텀 훅 모음
+ * React Query를 사용하여 자동 캠싱, 리페치, 냙관적 업데이트 처리
+ * 생성/수정/삭제 성공/실패 시 토스트 메시지로 사용자 피드백 제공
+ */
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCompanyServerRooms, createServerRoom, updateServerRoom, getDataCenters, deleteServerRoom, createDataCenter, updateDataCenter, deleteDataCenter } from "../api/serverRoomApi";
 import type { CreateServerRoomRequest, UpdateServerRoomRequest, CreateDataCenterRequest, UpdateDataCenterRequest } from "../api/serverRoomApi";
@@ -10,7 +18,9 @@ interface ErrorResponse {
 }
 
 /**
- * 데이터센터 목록 조회 query
+ * @function useDataCenters
+ * @description 데이터센터 목록 조회 query hook
+ * @returns {UseQueryResult} 데이터센터 목록 데이터
  */
 export const useDataCenters = () => {
   return useQuery({

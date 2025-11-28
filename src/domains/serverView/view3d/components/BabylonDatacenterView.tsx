@@ -1,3 +1,13 @@
+/**
+ * @author 김대호
+ * @description Babylon.js 기반 3D 데이터센터 뷰 - 서버실의 장비를 3D로 시각화하고 관리하는 메인 컴포넌트
+ * Babylon.js 엔진을 사용하여 서버실 내 장비 배치를 3D 입체로 표현
+ * 편집 모드에서 장비 추가/삭제/이동/회전 가능, 보기 모드에서 장비 상태 모니터링
+ * 드래그&드롭으로 장비 배치, 키보드 단축키 지원 (Delete, R, Ctrl+Z/Y)
+ * 컨텍스트 메뉴로 장비 세부 제어, 다중 선택 및 일괄 작업 지원
+ * 실시간 알림 및 장비 상태 색상 표시 (정상/경고/위험)
+ */
+
 import { useRef, useEffect, useState, useCallback } from 'react';
 import type { Scene } from '@babylonjs/core';
 import { Snackbar, Alert } from '@mui/material';
@@ -27,6 +37,12 @@ interface BabylonDatacenterViewProps {
   serverRoomId?: string; // 서버실 ID
 }
 
+/**
+ * @function BabylonDatacenterView
+ * @description 3D 데이터센터 뷰 컴포넌트 - Babylon.js로 서버실을 3D 렌더링
+ * @param {BabylonDatacenterViewProps} props - 초기 모드와 서버실 ID
+ * @returns {JSX.Element} 3D 데이터센터 뷰 UI
+ */
 function BabylonDatacenterView({ mode: initialMode = 'view', serverRoomId }: BabylonDatacenterViewProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<Scene | null>(null);

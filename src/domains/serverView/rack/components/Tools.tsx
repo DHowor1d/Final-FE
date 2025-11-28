@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 장비 타입 선택 도구 컴포넌트
+ */
+
 import serverImg from "../assets/server.svg";
 import storageImg from "../assets/storage.svg";
 import switchImg from "../assets/switch.svg";
@@ -9,12 +14,25 @@ import type { EquipmentCard } from "../types";
 import { typeColorMap } from "../utils/colorMap";
 import Tooltip from "./Tooltip";
 
+/**
+ * 도구 컴포넌트 props
+ */
 interface ToolsProps {
   onCardClick: (card: EquipmentCard) => void;
   onContextMenu: (e: React.MouseEvent, card: EquipmentCard) => void;
 }
 
+/**
+ * 장비 타입 선택 도구
+ * @param {ToolsProps} props - 도구 속성
+ * @param {(card: EquipmentCard) => void} props.onCardClick - 카드 클릭 핸들러
+ * @param {(e: React.MouseEvent, card: EquipmentCard) => void} props.onContextMenu - 컨텍스트 메뉴 핸들러
+ * @returns 도구 컴포넌트
+ */
 function Tools({ onCardClick, onContextMenu }: ToolsProps) {
+  /**
+   * 사용 가능한 장비 타입 목록
+   */
   const deviceCards: EquipmentCard[] = [
     {
       key: "server",

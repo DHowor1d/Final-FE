@@ -1,9 +1,25 @@
+/**
+ * @author 구희원
+ * @description 서버 대시보드 헤더 컴포넌트
+ */
+
 import DoubleArrow from "../assets/doubleArrow.svg";
 
+/**
+ * 서버 대시보드 헤더 props
+ */
 interface ServerDashboardHeaderProps {
   deviceName: string;
   onClose: () => void;
 }
+
+/**
+ * 서버 대시보드 헤더
+ * @param {ServerDashboardHeaderProps} props - 헤더 속성
+ * @param {string} props.deviceName - 장비 이름
+ * @param {() => void} props.onClose - 닫기 핸들러
+ * @returns 대시보드 헤더 컴포넌트
+ */
 function ServerDashboardHeader({
   deviceName,
   onClose,

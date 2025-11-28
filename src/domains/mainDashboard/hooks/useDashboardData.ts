@@ -1,3 +1,11 @@
+/**
+ * @author 김대호
+ * @description 메인 대시보드 데이터 관리 훅 - 데이터센터, 서버실, 랙 데이터 관리
+ * 회사의 데이터센터 및 서버실 목록을 조회하고, 서버실 선택 시 해당 랙 정보를 lazy loading
+ * 랙 데이터를 서버실별로 캠싱하여 불필요한 API 호출 방지
+ * 데이터센터 단위로 모든 서버실의 랙 정보를 병렬로 프리페치하는 기능 제공
+ */
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -8,9 +16,10 @@ import {
 import type { Datacenter, Rack } from "../types/dashboard.types";
 
 /**
- * 메인 대시보드 데이터 관리 훅
- * - 회사의 데이터센터 및 서버실 목록 조회
- * - 서버실 선택 시 해당 서버실의 랙 정보를 lazy loading
+ * @function useDashboardData
+ * @description 메인 대시보드 데이터 관리 훅 - 계층적 데이터 구조 관리
+ * @param {number} companyId - 회사 ID
+ * @returns {Object} 데이터센터 목록, 로딩 상태, 랙 로드 함수
  */
 export const useDashboardData = (companyId: number) => {
   // 서버실별 랙 정보 캐시

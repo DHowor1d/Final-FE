@@ -1,3 +1,13 @@
+/**
+ * @author 구희원
+ * @description 서버 대시보드 차트 설정 상수
+ */
+
+/**
+ * 차트 설정
+ * @property {number} MAX_POINTS - 차트에 표시할 최대 데이터 포인트 수
+ * @property {Object} COLORS - 차트 색상 맵
+ */
 export const CHART_CONFIG = {
   MAX_POINTS: 12,
   COLORS: {
@@ -16,7 +26,12 @@ export const CHART_CONFIG = {
   },
 } as const;
 
-// 임계값 기본값
+/**
+ * 임계값 기본값
+ * @property {Object} cpu - CPU 임계값 (warning: 경고, critical: 위험)
+ * @property {Object} memory - 메모리 임계값
+ * @property {Object} disk - 디스크 임계값
+ */
 export const DEFAULT_THRESHOLD_VALUES = {
   cpu: { warning: 0, critical: 0 },
   memory: { warning: 0, critical: 0 },

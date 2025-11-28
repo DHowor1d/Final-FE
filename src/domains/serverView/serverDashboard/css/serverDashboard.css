@@ -1,5 +1,11 @@
+/**
+ * @author 구희원
+ * @description 서버 대시보드 스타일시트
+ */
+
 @import "tailwindcss";
 
+/* 스크롤바 숨김 유틸리티 */
 @layer utilities {
   .scrollbar-none {
     scrollbar-width: none;
@@ -7,7 +13,7 @@
   }
 }
 
-/* 의사 요소는 밖에서 */
+/* 웹킷 브라우저 스크롤바 숨김 */
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
@@ -19,18 +25,19 @@
   @apply transition-transform duration-300 ease-out px-4 py-3;
 }
 
+/* 대시보드 열림 상태 */
 .dashboard-container.open {
   @apply translate-x-0;
 }
 
+/* 대시보드 닫힘 상태 */
 .dashboard-container.closed {
   @apply translate-x-full;
 }
 
-/* 컨텐츠 영역 */
+/* 대시보드 컨텐츠 영역 */
 .dashboard-content {
   @apply flex-1 overflow-y-auto mt-3;
-  /* scrollbar-none 제거됨 */
 }
 
 /* 차트 그리드 컨테이너 */
@@ -38,17 +45,19 @@
   @apply flex flex-col gap-3;
 }
 
-/* 차트 행 (3개 열 - small) */
+/* 차트 행 레이아웃 */
+
+/* Small 사이즈 행 (3개 열) */
 .chart-row-small {
   @apply flex gap-3 h-70;
 }
 
-/* 차트 행 (2개 열 - medium) */
+/* Medium 사이즈 행 (2개 열) */
 .chart-row-medium {
   @apply flex gap-3 h-80;
 }
 
-/* 차트 행 (1개 열 - large) */
+/* Large 사이즈 행 (1개 열) */
 .chart-row-large {
   @apply flex gap-3 h-96;
 }

@@ -1,3 +1,8 @@
+/**
+ * @author 구희원
+ * @description 서버 모니터링 대시보드 컴포넌트
+ */
+
 import { useMemo } from "react";
 import "../css/serverDashboard.css";
 import ServerDashboardHeader from "./ServerDashboardHeader";
@@ -16,6 +21,9 @@ import { buildChartData, type HistoryRecord } from "../utils/chartDataBuilder";
 import { DEFAULT_THRESHOLD_VALUES } from "../constants";
 import type { Equipments } from "../../rack/types";
 
+/**
+ * 서버 대시보드 props
+ */
 interface ServerDashboardProps {
   deviceId: number;
   deviceName: string;
@@ -26,12 +34,27 @@ interface ServerDashboardProps {
   currentEquipment?: Equipments;
 }
 
+/**
+ * 임계값 설정
+ */
 interface ThresholdValues {
   cpu: { warning: number; critical: number };
   memory: { warning: number; critical: number };
   disk: { warning: number; critical: number };
 }
 
+/**
+ * 서버 모니터링 대시보드
+ * @param {ServerDashboardProps} props - 대시보드 속성
+ * @param {number} props.deviceId - 장비 ID
+ * @param {string} props.deviceName - 장비 이름
+ * @param {() => void} props.onClose - 닫기 핸들러
+ * @param {boolean} props.isOpen - 대시보드 열림 상태
+ * @param {number} props.rackId - 랙 ID
+ * @param {number} props.serverRoomId - 서버룸 ID
+ * @param {Equipments} props.currentEquipment - 현재 장비 정보
+ * @returns 서버 대시보드 컴포넌트
+ */
 function ServerDashboard({
   deviceName,
   isOpen,
@@ -46,7 +69,9 @@ function ServerDashboard({
   const { systemData, diskData, systemHistory, diskHistory, networkHistory } =
     useMonitoringStore();
 
-  // 임계값 초기화
+  /**
+   * 임계값 초기화
+   */
   const initialThresholds = useMemo<ThresholdValues>(() => {
     if (!currentEquipment) {
       return DEFAULT_THRESHOLD_VALUES;
@@ -68,7 +93,9 @@ function ServerDashboard({
     };
   }, [currentEquipment]);
 
-  // 임계값 저장
+  /**
+   * 임계값 저장 핸들러
+   */
   const handleSaveThresholds = (values: ThresholdValues) => {
     if (!currentEquipment) {
       console.error("장비 정보를 찾을 수 없습니다.");
@@ -105,6 +132,9 @@ function ServerDashboard({
     );
   };
 
+  /**
+   * 차트 데이터 생성
+   */
   const chartData = useMemo(() => {
     return buildChartData({
       systemData,
@@ -143,6 +173,7 @@ function ServerDashboard({
 
       <div className="dashboard-content scrollbar-none">
         <div className="chart-grid">
+          {/* CPU, Memory, Disk 게이지 */}
           <div className="chart-row-small">
             <ChartCard title="CPU 사용률" icon={CpuIcon} size="small">
               <GaugeChart
@@ -172,6 +203,7 @@ function ServerDashboard({
             </ChartCard>
           </div>
 
+          {/* CPU 모드 분포 & 시스템 부하 */}
           <div className="chart-row-medium">
             <ChartCard title="CPU 사용 모드별 분포" size="medium">
               <BarChart
@@ -190,6 +222,7 @@ function ServerDashboard({
             </ChartCard>
           </div>
 
+          {/* 메모리 & 스왑 */}
           <div className="chart-row-large">
             <ChartCard title="메모리 & 스왑 사용률" size="large">
               <SmoothLineChart
@@ -200,6 +233,7 @@ function ServerDashboard({
             </ChartCard>
           </div>
 
+          {/* 네트워크 & CPU Wait */}
           <div className="chart-row-medium">
             <ChartCard title="네트워크 대역폭" size="medium">
               <AreaLineChart
@@ -218,6 +252,7 @@ function ServerDashboard({
             </ChartCard>
           </div>
 
+          {/* 디스크 I/O & Inode */}
           <div className="chart-row-medium">
             <ChartCard title="디스크 읽기/쓰기 속도" size="medium">
               <AreaLineChart

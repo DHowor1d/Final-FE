@@ -1,5 +1,13 @@
+/**
+ * @author 구희원
+ * @description 클릭 가능한 아이콘 컴포넌트 (Konva)
+ */
+
 import { Group, Image } from "react-konva";
 
+/**
+ * 클릭 가능한 아이콘 props
+ */
 interface ClickableIconProps {
   image: HTMLImageElement | null;
   x: number;
@@ -9,6 +17,17 @@ interface ClickableIconProps {
   onClick: () => void;
 }
 
+/**
+ * 클릭 가능한 아이콘
+ * @param {ClickableIconProps} props - 아이콘 속성
+ * @param {HTMLImageElement | null} props.image - 표시할 이미지
+ * @param {number} props.x - X 좌표
+ * @param {number} props.y - Y 좌표
+ * @param {number} props.width - 너비
+ * @param {number} props.height - 높이
+ * @param {() => void} props.onClick - 클릭 이벤트 핸들러
+ * @returns 클릭 가능한 아이콘 컴포넌트
+ */
 function ClickableIcon({
   image,
   x,

@@ -1,3 +1,13 @@
+/**
+ * @author 김대호
+ * @description 장비 액션 관리 훅 - 장비의 생성/삭제/회전/이동 등의 작업을 처리
+ * API 호출을 통한 서버 데이터 동기화 및 로컬 스토어 업데이트
+ * 장비 추가 시 자동으로 다음 번호를 부여하여 고유한 이름 생성
+ * 위치 유효성 검사 및 충돌 감지로 잘못된 배치 방지
+ * 다중 선택된 장비에 대한 일괄 작업 지원
+ * 작업 성공/실패 시 토스트 메시지로 사용자 피드백 제공
+ */
+
 import { useCallback } from 'react';
 import { useBabylonDatacenterStore } from '../stores/useBabylonDatacenterStore';
 import { createDevice, deleteEquipment, updateEquipment } from '../api/serverRoomEquipmentApi';
@@ -10,7 +20,12 @@ interface UseEquipmentActionsParams {
   showToast: (message: string, severity?: ToastSeverity) => void;
 }
 
-/** 장비 추가/삭제/회전 액션 관리 */
+/**
+ * @function useEquipmentActions
+ * @description 장비 추가/삭제/회전 액션 관리 훅
+ * @param {UseEquipmentActionsParams} params - 서버실 ID와 토스트 함수
+ * @returns {Object} 장비 추가/삭제/회전 핸들러 함수들
+ */
 export function useEquipmentActions({
   serverRoomId,
   showToast,
