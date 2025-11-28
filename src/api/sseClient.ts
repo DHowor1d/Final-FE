@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description SSE (Server-Sent Events) 클라이언트 - 서버로부터 실시간 데이터 스트림을 수신하는 클라이언트
  * 데이터센터, 서버실, 랙, 장비 등의 모니터링 데이터를 SSE로 수신
  * 자동 재연결 기능 포함, 최대 재연결 횟수 및 딥레이 설정 가능

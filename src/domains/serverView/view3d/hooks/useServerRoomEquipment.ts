@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 서버실 장비 데이터 조회 훅 - React Query를 사용한 서버실 장비 목록 관리
  * API로부터 서버실의 장비 배치 정보와 그리드 설정을 가져옴
  * React Query의 캐싱과 자동 재조회 기능으로 중복 API 호출 방지

@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description Babylon.js 씬 초기화 및 관리 훅 - 3D 렌더링 엔진과 씬을 설정
  * Babylon.js Engine과 Scene을 생성하고 카메라, 조명을 초기화
  * 아이소메트릭 뷰를 위한 ArcRotateCamera 설정 (상단에서 비스듬히 내려다보는 시점)

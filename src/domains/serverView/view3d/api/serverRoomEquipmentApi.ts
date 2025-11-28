@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 서버실 장비 관리 API - 서버실 장비의 CRUD 작업을 처리하는 API 함수 모음
  * 백엔드 API와 통신하여 장비 목록 조회, 생성, 수정, 삭제 수행
  * 백엔드 데이터 구조를 프론트엔드 Equipment3D 타입으로 변환

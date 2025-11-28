@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 공통 레이아웃 컴포넌트 - 전체 페이지에 공통으로 적용되는 기본 레이아웃
  * 헤더와 메인 콘텐츠 영역으로 구성되어 일관된 UI 구조 제공
  * 화면 전체를 채우는 flex 레이아웃으로 overflow 처리

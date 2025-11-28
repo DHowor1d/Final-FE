@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description Babylon.js 3D 뷰 전역 상태 관리 Zustand 스토어
  * 서버실의 장비 배치, 선택 상태, 편집/보기 모드, 그리드 설정 등을 관리
  * 장비 추가/삭제/이동/회전, 다중 선택, Undo/Redo 기능 제공

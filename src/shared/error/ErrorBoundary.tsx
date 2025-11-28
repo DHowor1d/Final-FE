@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 에러 바운드리 컴포넌트 - React 컴포넌트 트리에서 발생하는 에러를 포협하여 처리
  * 자식 컴포넌트에서 발생한 에러를 감지하고 fallback UI를 표시하여 전체 앱 충돌 방지
  * 커스텀 에러 핸들러와 fallback UI를 지원하며, 에러 복구 기능 제공

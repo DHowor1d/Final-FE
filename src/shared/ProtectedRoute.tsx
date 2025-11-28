@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 보호된 라우트 컴포넌트 - 인증된 사용자만 접근 가능한 경로를 보호
  * Zustand 인증 스토어의 authenticated 상태를 확인하여 접근 제어
  * 인증되지 않은 사용자는 로그인 페이지("/")로 리다이렉트

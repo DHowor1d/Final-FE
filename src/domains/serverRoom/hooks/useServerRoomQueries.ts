@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 서버실 및 데이터센터 관리를 위한 React Query hooks
  * 데이터센터와 서버실의 CRUD 작업을 처리하는 커스텀 훅 모음
  * React Query를 사용하여 자동 캠싱, 리페치, 냙관적 업데이트 처리

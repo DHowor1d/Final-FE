@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 라우터 설정 - 애플리케이션의 모든 라우트를 정의하는 파일
  * React Router v6의 createBrowserRouter를 사용하여 라우팅 구조 정의
  * ProtectedRoute로 인증된 사용자만 접근 가능한 경로 보호

@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 로그인 API - 사용자 인증을 처리하는 API 호출
  * 아이디와 비밀번호를 서버로 전송하여 인증 토큰 및 사용자 정보 반환
  * 응답은 API 표준 형식(status_code, status_message, result)을 따름

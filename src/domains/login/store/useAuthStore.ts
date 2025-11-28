@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 인증 상태 관리 Zustand 스토어 - 사용자 로그인 상태와 토큰을 관리
  * Access Token은 메모리에만 저장하고, Refresh Token은 httpOnly 쿠키로 관리하여 보안 강화
  * 사용자 정보는 localStorage에 persist하여 페이지 새로고침 후에도 로그인 상태 유지

@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description 로그인 훅 - 로그인 처리를 위한 React Query mutation hook
  * 로그인 API를 호출하고 성공 시 인증 상태를 스토어에 저장하고 대시보드로 리다이렉트
  * 실패 시 에러 로그5 및 사용자에게 피드백 표시

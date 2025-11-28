@@ -1,5 +1,5 @@
 /**
- * @author dhowor1d
+ * @author 김대호
  * @description API 클라이언트 설정 - axios 기반 HTTP 클라이언트
  * Access Token을 메모리에 저장하고 요청에 자동 포함
  * Refresh Token은 HttpOnly 쿠키로 관리하여 보안 강화
