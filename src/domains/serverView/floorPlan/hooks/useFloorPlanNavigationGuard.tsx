@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 플로어 플랜 네비게이션 가드 훅 - 편집 모드에서 저장되지 않은 변경사항이 있을 경우 페이지 이탈을 방지
+ * React Router의 `useBlocker`를 활용하여 내부 라우팅 이동 시 커스텀 확인 모달(ConfirmationModal)을 호출
+ * 브라우저의 `beforeunload` 이벤트를 리스닝하여 새로고침이나 탭 닫기 시 네이티브 경고 대화상자 표시
+ * 사용자가 이탈을 확정하면 편집 이력(Temporal History)을 초기화하고 네비게이션을 진행시키는 안전 장치 역할
+ */
 import { useEffect } from 'react';
 import { useBlocker, useLocation } from 'react-router-dom';
 import { useFloorPlanStore, useHasUnsavedChanges } from '../store/floorPlanStore';

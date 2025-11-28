@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 export interface ServerRoom {
   id: number;
   name: string; // 서버실 이름

@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 캔버스 확대경(Magnifier) 위젯 컴포넌트 - 마우스 커서 위치의 상세 뷰를 확대하여 제공
+ * 메인 Canvas와 별도의 독립된 Konva Stage를 렌더링하여 2배율(Zoom 2.0x) 확대 효과 구현
+ * 마우스 좌표를 Stage 좌표계로 변환하고, 현재 활성화된 레이어 및 필터링된 자산만 선별적으로 렌더링
+ * 화면 우하단에 고정 배치되며, 십자선(Crosshair)과 현재 좌표 정보를 포함하여 정밀한 작업 보조
+ */
 import React, { useMemo, memo } from 'react';
 import { Stage, Layer } from 'react-konva';
 import { useFloorPlanStore } from '../store/floorPlanStore';

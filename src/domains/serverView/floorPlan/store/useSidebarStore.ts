@@ -1,3 +1,8 @@
+
+/**
+ * @author 최산하
+
+ */
 import { create } from "zustand";
 
 // 사이드바의 열림/닫힘 상태를 관리하기 위한 인터페이스

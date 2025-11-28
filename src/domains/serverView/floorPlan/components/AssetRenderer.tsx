@@ -1,4 +1,12 @@
-
+/**
+ * @author 최산하
+ * @description 자산 렌더러 컴포넌트 - 모드와 자산 타입에 따라 적절한 시각화 컴포넌트를 분기 처리(Dispatcher)
+ * 'edit' 모드: 편집이 가능한 LayoutAssetView 렌더링
+ * 'view' 모드:
+ * - 'status' 디스플레이 모드이면서 'Rack(랙)'인 경우: 상태 모니터링용 DashboardAssetView 렌더링
+ * - 그 외(비-랙 자산 또는 일반 보기 모드): 표준 LayoutAssetView 렌더링
+ * Konva Canvas 내부에서 각 자산 객체를 그리는 진입점 역할 수행
+ */
 import React from 'react';
 import { useFloorPlanStore } from '../store/floorPlanStore';
 import type { Asset, DisplayMode, DisplayOptionsType } from '../types';
@@ -37,14 +45,14 @@ const AssetRenderer: React.FC<AssetRendererProps> = (props) => {
 if (mode === 'view') {
     if (displayMode === 'status') { // '상태 임계값' 모드
       if (asset.assetType === 'rack') {
-        // 🌟 2. currentScale prop 전달
+        //  2. currentScale prop 전달
         return <DashboardAssetView {...props} />;
       } else {
-        // 🌟 2. currentScale prop 전달
+        //  2. currentScale prop 전달
         return <LayoutAssetView {...props} />;
       }
     } else {
-      // 🌟 2. currentScale prop 전달
+      //  2. currentScale prop 전달
       return <LayoutAssetView {...props} />;
     }
   }

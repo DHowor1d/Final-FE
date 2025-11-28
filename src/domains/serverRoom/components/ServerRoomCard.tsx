@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import { useNavigate } from "react-router-dom";
 import type { ServerRoom } from "../types";
 import { FaMapMarkerAlt, FaPencilAlt, FaTrash } from "react-icons/fa";

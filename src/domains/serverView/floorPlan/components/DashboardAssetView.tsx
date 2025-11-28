@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 대시보드 자산 뷰 컴포넌트 - 2D 캔버스 상에서 서버 랙의 실시간 상태와 성능 지표를 시각화
+ * CPU, 메모리, 온도 등 센서 데이터에 따라 색상(정상/주의/위험) 및 아이콘을 동적으로 변경하여 직관적인 모니터링 지원
+ * 줌 레벨(Scale)에 따른 LOD(Level of Detail) 처리를 통해 축소 시에는 개요만, 확대 시에는 상세 게이지 및 텍스트 표시
+ * 사용자가 선택한 Metric View 모드(기본, CPU 상세, 전력/네트워크 등)에 따라 내부 렌더링 레이아웃 분기 처리
+ */
 import React from "react";
 import { Group, Rect, Text } from "react-konva";
 import type { KonvaEventObject } from "konva/lib/Node";

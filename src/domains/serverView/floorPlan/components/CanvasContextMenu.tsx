@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 캔버스 컨텍스트 메뉴 컴포넌트 - 자산 우클릭 시 나타나는 팝업 메뉴
+ * 마우스 포인터 좌표(x, y)를 기준으로 메뉴를 표시하고 자산 삭제 기능을 제공
+ * useRef와 이벤트 리스너를 활용하여 메뉴 외부 영역 클릭 시 자동으로 닫히는 로직 구현
+ * 배경 흐림(backdrop-blur) 및 그림자 효과를 적용하여 시각적 계층 구분
+ */
 import React, { useEffect, useRef } from 'react';
 import { Trash2 } from 'lucide-react';
 

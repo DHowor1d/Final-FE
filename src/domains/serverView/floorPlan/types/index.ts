@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 export type Mode = 'view' | 'edit';
 export type DoorDirection = 'north' | 'south' | 'east' | 'west';
 export type AssetStatus = 'normal' | 'warning' | 'danger';

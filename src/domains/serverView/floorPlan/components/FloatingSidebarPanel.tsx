@@ -1,4 +1,11 @@
-
+/**
+ * @author 최산하
+ * @description 플로팅 사이드바 패널 컴포넌트 - 화면 좌/우측에 배치되어 슬라이딩 애니메이션으로 열고 닫히는 UI 컨테이너
+ * position prop('left' | 'right')에 따라 패널 위치 및 진입/이탈 방향 자동 계산
+ * CSS Transform과 Transition을 활용하여 부드러운 슬라이드 효과 구현
+ * 패널 측면에 부착된 토글 버튼을 통해 직관적인 개폐 제어 가능
+ * Backdrop-blur(배경 흐림) 효과를 적용하여 모던한 글래스모피즘 스타일 제공
+ */
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 

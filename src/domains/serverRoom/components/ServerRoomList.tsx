@@ -1,3 +1,7 @@
+
+/**
+ * @author 최산하
+ */
 import type { DataCenterGroup, ServerRoom } from '../types';
 import ServerRoomCard from './ServerRoomCard';
 import '../css/serverRoomList.css';

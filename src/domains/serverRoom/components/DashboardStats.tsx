@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 interface DashboardStatsProps {
   stats: {
     totalDataCenters: number;

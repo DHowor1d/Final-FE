@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 실시간 문제 리포트(Top N) 위젯 - 데이터센터 내 이상 징후가 감지된 자산 상위 목록 표시
+ * CPU 사용량(75%↑) 및 온도(30°C↑) 데이터를 분석하여 위험도가 높은 상위 5개 랙을 자동 선별
+ * 항목 클릭 시 해당 자산 위치로 뷰포트를 이동(Zoom-to)시키는 네비게이션 기능 제공
+ * 헤더 토글을 통해 리스트를 접거나 펼칠 수 있으며, 이상 자산이 없을 경우 자동으로 숨김 처리
+ */
 import React, { useMemo, useState } from 'react'; 
 import { useFloorPlanStore, zoomToAsset } from '../store/floorPlanStore';
 import { AlertTriangle, 

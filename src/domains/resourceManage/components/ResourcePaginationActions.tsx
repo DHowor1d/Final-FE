@@ -1,4 +1,6 @@
-
+/**
+ * @author 최산하
+ */
 import { useState } from 'react'; 
 import type { Table } from '@tanstack/react-table';
 import type { Resource, ResourceStatus } from '../types/resource.types'; 

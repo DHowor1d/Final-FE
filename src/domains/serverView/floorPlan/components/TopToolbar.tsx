@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 상단 툴바 컴포넌트 - 서버실 타이틀 표시 및 모드별(보기/편집) 핵심 제어 기능 제공
+ * 보기 모드: 캔버스 줌(Zoom) 레벨 조정 및 확대경 위젯 토글 기능 지원
+ * 편집 모드: Zustand Temporal 미들웨어를 활용한 실행 취소(Undo) 및 다시 실행(Redo) 기능 제공
+ * 모드 전환 시 다중 선택된 자산이 존재할 경우 자동으로 그룹화 여부를 확인하는 사용자 편의 로직 포함
+ */
 import React from 'react';
 import { useStore } from 'zustand';
 import { useFloorPlanStore, toggleMagnifier, toggleMode, groupSelectedAssets, zoom } from '../store/floorPlanStore';

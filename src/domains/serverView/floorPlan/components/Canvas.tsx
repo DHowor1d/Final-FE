@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 메인 2D 캔버스 컴포넌트 - 서버실 평면도 시각화 및 편집의 핵심 영역
+ * Konva.js(react-konva) 기반의 Stage/Layer 구조를 통해 그리드, 자산, 히트맵을 렌더링
+ * 마우스 휠 줌/팬, 외부 자산 드래그 앤 드롭 배치, 우클릭 컨텍스트 메뉴 등 주요 인터랙션 처리
+ * 보기 모드(View/Edit) 및 대시보드 옵션(히트맵, 상태 필터)에 따른 동적 렌더링 지원
+ */
 import React, { useState, useLayoutEffect, useEffect } from 'react';
 import { Stage, Layer, Group } from 'react-konva';
 import { useDroppable } from '@dnd-kit/core';

@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import client from "@api/client";
 import type { DataCenterGroup, ServerRoom, CompanyServerRoomsResponse } from "../types";
 

@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import { useState } from "react";
 import { useDeleteDataCenter } from "./useServerRoomQueries";
 import type { DataCenterGroup } from "../types";

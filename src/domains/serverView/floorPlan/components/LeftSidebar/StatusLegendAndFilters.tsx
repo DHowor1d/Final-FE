@@ -1,4 +1,11 @@
-
+/**
+ * @author 최산하
+ * @description 대시보드 모니터링 필터 및 범례 제어 패널
+ * 시각화 모드(Metric View) 전환: 기본 상태, CPU 상세, 히트맵(온도/전력) 등 뷰 변경
+ * 심각도(Severity) 필터링: 위험, 주의, 정상 등 특정 상태의 장비만 필터링하여 표시
+ * 자산 레이어(Asset Layer) 제어: 바닥, 벽, 천장 등 3D 레이어의 가시성 토글
+ * 히트맵 모드의 경우 재클릭 시 기본 모드로 복귀하는 토글 로직 포함
+ */
 import React from 'react';
 import { useFloorPlanStore,
    setDashboardMetricView, 

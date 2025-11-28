@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import type { ColumnDef } from "@tanstack/react-table";
 import type {
   Resource,

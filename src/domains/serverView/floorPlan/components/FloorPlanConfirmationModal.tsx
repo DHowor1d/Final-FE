@@ -1,6 +1,12 @@
-// 1. 방금 수정한 "진짜" 공통 모달(Props 기반)을 가져옵니다.
+/**
+ * @author 최산하
+ * @description ServerView(Floor Plan) 전용 확인 모달 래퍼 컴포넌트
+ * 전역 상태 관리 훅인 'useModalStore'와 공통 UI 컴포넌트 'ConfirmationModal'을 연결하는 브릿지 역할
+ * 스토어의 상태(isOpen, title, message)를 구독하여 모달의 렌더링 여부 및 컨텐츠 제어
+ * 확인 버튼 텍스트('삭제', '나가기')를 분석하여 파괴적 액션(isDestructive) 여부를 자동으로 판단 및 스타일 적용
+ */
 import { ConfirmationModal } from '@shared/ConfirmationModal'; 
-// 2. serverView의 전용 스토어를 가져옵니다.
+
 import { useModalStore } from '../hooks/useConfirmationModal';
 
 /**

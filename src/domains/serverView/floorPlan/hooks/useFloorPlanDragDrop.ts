@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 플로어 플랜 드래그 앤 드롭(D&D) 로직 처리 훅 - 라이브러리 영역에서 캔버스 영역으로의 자산 배치 담당
+ * @dnd-kit의 handleDragEnd 이벤트를 처리하여 뷰포트 기준의 드롭 좌표를 Konva Stage 내부의 Grid 좌표로 정밀 변환
+ * 캔버스 컨테이너의 오프셋(getBoundingClientRect)과 현재 줌/팬 상태(Stage Scale/Pos)를 모두 고려한 위치 계산 수행
+ * 배치 전 충돌 감지(Collision Detection)를 수행하여 유효한 위치에만 자산이 추가되도록 제어
+ */
 import { type DragEndEvent } from '@dnd-kit/core';
 import { useFloorPlanStore, addAsset } from '../store/floorPlanStore';
 import type { Asset } from '../types';

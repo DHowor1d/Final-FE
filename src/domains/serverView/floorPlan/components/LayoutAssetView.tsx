@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 평면도 자산 렌더링 및 편집 컴포넌트 - 2D 캔버스 상에서 개별 자산의 시각화와 배치 상호작용 담당
+ * 자산의 그리드 위치와 크기를 계산하여 렌더링하고, 상태(Status) 및 선택 여부에 따른 동적 스타일링 제공
+ * Konva Drag 이벤트와 연동하여 자산(및 그룹) 이동, 충돌 감지, 경계 이탈 방지 로직 수행
+ * 랙(Rack) 및 문(Door)의 회전 방향을 고려한 상세 뷰와 편집/보기 모드에 따른 텍스트 라벨링 제어
+ */
 import React from 'react';
 import { Group, Rect, Text, Circle } from 'react-konva';
 import type { KonvaEventObject } from 'konva/lib/Node';

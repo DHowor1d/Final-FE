@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import React, { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import type { DataCenterGroup } from "../types";

@@ -1,3 +1,6 @@
+/**
+ * @author 최산하
+ */
 import { Cpu, MemoryStick, HardDrive, Network, Thermometer, Droplets, Server, Box } from 'lucide-react';
 import { useServerRoomSSE } from '@shared/hooks';
 

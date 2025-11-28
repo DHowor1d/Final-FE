@@ -1,3 +1,10 @@
+/**
+ * @author 최산하
+ * @description 캔버스 그리드 컴포넌트 - 서버실의 바닥면과 좌표계를 시각화
+ * 격자(Grid) 라인과 행(숫자)/열(알파벳) 헤더를 렌더링하여 자산의 위치 식별을 도움
+ * 대시보드 모드('status') 여부에 따라 배경색을 동적으로 변경하여 시각적 모드 구분 (어두운 테마/일반 테마)
+ * React-Konva의 Group, Rect, Line, Text를 사용하여 고성능 벡터 그래픽으로 구현
+ */
 import React from 'react';
 import { Group, Line, Text, Rect } from 'react-konva';
 
