@@ -1,7 +1,21 @@
+/**
+ * @author dhowor1d
+ * @description SSE (Server-Sent Events) 클라이언트 - 서버로부터 실시간 데이터 스트림을 수신하는 클라이언트
+ * 데이터센터, 서버실, 랙, 장비 등의 모니터링 데이터를 SSE로 수신
+ * 자동 재연결 기능 포함, 최대 재연결 횟수 및 딥레이 설정 가능
+ * AbortController를 사용하여 연결 종료 및 재연결 관리
+ * Access Token 기반 인증으로 보안 연결 유지
+ */
+
 import { getAccessToken } from "./client";
 
 const BASE_URL = "https://api.serverway.shop/api";
 
+/**
+ * @interface SSEOptions
+ * @description SSE 연결 옵션 타입 정의
+ * @template T - 수신할 데이터의 타입
+ */
 export interface SSEOptions<T = unknown> {
   onMessage: (data: T) => void;
   onError?: (error: Event) => void;
@@ -17,6 +31,14 @@ export interface SSEConnection {
 }
 
 
+/**
+ * @function createSSEConnection
+ * @description SSE 연결을 생성하고 관리하는 핵심 함수
+ * @template T - 수신할 데이터의 타입
+ * @param {string} endpoint - SSE 엔드포인트 URL
+ * @param {SSEOptions<T>} options - SSE 연결 옵션 (콜백 함수, 재연결 설정 포함)
+ * @returns {SSEConnection} SSE 연결 제어 객체 (close, reconnect, isConnected 메서드)
+ */
 export const createSSEConnection = <T = unknown>(
   endpoint: string,
   options: SSEOptions<T>

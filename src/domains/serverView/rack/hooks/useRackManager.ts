@@ -1,3 +1,13 @@
+/**
+ * @author dhowor1d
+ * @description 랙 관리 훅 - 랙 내부 장비의 배치, 이동, 삭제, 수정 등 전반적인 관리 기능 제공
+ * 랙의 장비 목록을 조회하고, 장비 추가/삭제/이동/수정 API 호출 처리
+ * 드래그&드롭으로 장비 배치, U 단위 차지 계산 및 충돌 검사
+ * 임시 장비 상태 관리로 실시간 UI 업데이트 및 API 호출 분리
+ * 장비 이름 편집 모드 관리 및 키보드 이벤트 처리 (Enter, Escape)
+ * 러 상태 초기화로 랙 UI 재렌더링 트리거 기능
+ */
+
 import { useState, useCallback, useMemo } from "react";
 import type { Equipments, FloatingDevice, EquipmentCard } from "../types";
 import { checkCollision } from "../utils/rackCollisionDetection";
@@ -15,6 +25,13 @@ interface UseRackManagerProps {
   frontView?: boolean;
   serverRoomId: number;
 }
+
+/**
+ * @function useRackManager
+ * @description 랙 관리 훅 - 랙 내부 장비의 전반적인 상태와 동작 관리
+ * @param {UseRackManagerProps} props - 랙 ID, 파라미터, 뷰 모드, 서버실 ID
+ * @returns {Object} 장비 목록, 랙 정보, 이벤트 핸들러 함수들
+ */
 export function useRackManager({
   rackId,
   params,

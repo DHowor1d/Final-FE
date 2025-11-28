@@ -1,3 +1,11 @@
+/**
+ * @author dhowor1d
+ * @description 2D 평면도 페이지 - 서버실의 2D 평면도를 표시하고 편집하는 페이지
+ * 3D 데이터를 2D 그리드 레이아웃으로 변환하여 표시하며, 드래그&드롭으로 장비 배치 가능
+ * 편집 모드에서는 장비 팔레트로 새 장비를 추가하고, 보기 모드에서는 메트릭 정보와 TopN 위젯을 표시
+ * 확대경 기능으로 상세 보기 가능, 저장하지 않고 페이지 이탈 시 경고 표시
+ */
+
 import React, { useEffect, useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import Canvas from '../components/Canvas'; 
@@ -22,6 +30,12 @@ interface FloorPlanPageProps {
   serverRoomId: string | undefined;
 }
 
+/**
+ * @function FloorPlanPage
+ * @description 2D 평면도 페이지 컴포넌트 - 서버실의 장비 배치를 2D로 시각화하고 편집
+ * @param {FloorPlanPageProps} props - 컨테이너 ref와 서버실 ID
+ * @returns {JSX.Element} 2D 평면도 UI
+ */
 const FloorPlanPage: React.FC<FloorPlanPageProps> = ({ containerRef, serverRoomId }) => {
   // 훅의 반환 값에 맞게 구조분해 할당을 수정합니다.
   // 'data: apiData'가 아니라 'equipment: equipment3D'와 'gridConfig'를 직접 받습니다.

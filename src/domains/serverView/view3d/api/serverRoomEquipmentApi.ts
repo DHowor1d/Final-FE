@@ -1,3 +1,13 @@
+/**
+ * @author dhowor1d
+ * @description 서버실 장비 관리 API - 서버실 장비의 CRUD 작업을 처리하는 API 함수 모음
+ * 백엔드 API와 통신하여 장비 목록 조회, 생성, 수정, 삭제 수행
+ * 백엔드 데이터 구조를 프론트엔드 Equipment3D 타입으로 변환
+ * 장비 생성 시 자동으로 고유 코드 생성 및 그리드 위치 검증
+ * 랙 생성 및 장비 업데이트를 위한 요청 빌더 사용
+ * 에러 발생 시 적절한 에러 메시지와 함께 throw
+ */
+
 import client from "@api/client";
 import type {
   Equipment3D,
@@ -22,8 +32,10 @@ import {
 const apiClient = client;
 
 /**
- * 서버실의 장비 목록 조회
- * @returns 장비 목록, 그리드 설정 정보, 서버실 정보
+ * @function fetchServerRoomEquipment
+ * @description 서버실의 장비 목록 조회
+ * @param {string} serverRoomId - 서버실 ID
+ * @returns {Promise} 장비 목록, 그리드 설정 정보, 서버실 이름
  */
 export async function fetchServerRoomEquipment(
   serverRoomId: string,

@@ -1,3 +1,10 @@
+/**
+ * @author dhowor1d
+ * @description 서버실 관리 대시보드 - 데이터센터별 서버실 목록과 통계를 관리하는 페이지
+ * 데이터센터 탭으로 구성되어 있으며, 각 데이터센터의 서버실을 생성/수정/삭제 가능
+ * 전체 서버실 통계(총 개수, 활성/유지보수 상태) 표시 및 권한에 따른 기능 제한 적용
+ */
+
 import React, { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ServerRoomList from "../components/ServerRoomList";
@@ -10,6 +17,11 @@ import { useDataCenterActions } from "../hooks/useDataCenterActions";
 import { useAuthStore } from "@domains/login/store/useAuthStore";
 import "../css/serverRoomDashboard.css";
 
+/**
+ * @function ServerRoomDashboard
+ * @description 서버실 대시보드 컴포넌트 - 데이터센터와 서버실을 종합 관리
+ * @returns {JSX.Element} 서버실 대시보드 UI
+ */
 const ServerRoomDashboard: React.FC = () => {
   const { datacenterId } = useParams<{ datacenterId: string }>();
   const navigate = useNavigate();

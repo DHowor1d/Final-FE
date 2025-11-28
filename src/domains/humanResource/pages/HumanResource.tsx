@@ -1,3 +1,11 @@
+/**
+ * @author dhowor1d
+ * @description 인적자원 관리 페이지 - 회사 구성원을 관리하는 페이지
+ * 회원 목록 조회, 검색, 추가, 수정, 삭제 기능 제공
+ * 테이블 형식으로 데이터 표시, 페이지네이션 및 정렬 기능 포함
+ * 개별 삭제 및 일괄 삭제 기능 지원
+ */
+
 import { useState, useMemo } from 'react';
 import {
   useReactTable,
@@ -27,6 +35,11 @@ import {
 } from '../hooks/useMemberQueries';
 import type { Member, MemberTableMeta } from '../types/memberTypes';
 
+/**
+ * @function HumanResource
+ * @description 인적자원 관리 페이지 컴포넌트 - 회원 목록 관리 및 CRUD 작업 수행
+ * @returns {JSX.Element} 인적자원 관리 페이지 UI
+ */
 export default function HumanResource() {
   // --- 상태 관리 ---
   const [pagination, setPagination] = useState<PaginationState>({

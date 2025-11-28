@@ -1,3 +1,10 @@
+/**
+ * @author dhowor1d
+ * @description 메인 대시보드 페이지 - 데이터센터, 서버실, 랙 계층 구조를 표시하고 관리하는 메인 페이지
+ * 왼쪽에 계층 구조 사이드바, 오른쪽에 선택된 노드의 상세 대시보드를 표시
+ * 데이터센터 -> 서버실 -> 랙 순으로 드릴다운하여 각 레벨의 통계와 상태를 확인 가능
+ */
+
 import { useState, useEffect } from 'react';
 import HierarchySidebar from '../components/HierarchySidebar';
 import Breadcrumb from '../components/Breadcrumb';
@@ -9,6 +16,11 @@ import { useDashboardData } from '../hooks/useDashboardData';
 import type { SelectedNode } from '../types/dashboard.types';
 import { ErrorBoundary } from '@shared/error';
 
+/**
+ * @function MainDashboard
+ * @description 메인 대시보드 컴포넌트 - 회사의 전체 인프라 현황을 계층적으로 표시
+ * @returns {JSX.Element} 메인 대시보드 UI
+ */
 function MainDashboard() {
   const COMPANY_ID = 1; // TODO: 실제 로그인 회사 ID로 교체
   
