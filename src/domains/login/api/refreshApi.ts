@@ -1,5 +1,5 @@
 /**
- * @author 구희원
+ * @author 김대호
  * @description Access Token 갱신 API 호출 유틸리티
  *
  * - 서버에 Refresh Token 기반 요청
