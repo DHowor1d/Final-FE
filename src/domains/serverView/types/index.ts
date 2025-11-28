@@ -1,5 +1,5 @@
 /**
- * @author 구희원
+ * @author 김대호
  * @description 3D 서버룸 장비 타입 정의
  */
 
