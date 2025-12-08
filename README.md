@@ -136,6 +136,8 @@
       <td>데이터베이스</td>
       <td>
         <img src="https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Patroni-%23336791.svg?style=for-the-badge&logo=postgresql&logoColor=white"/>
+        <img src="https://img.shields.io/badge/etcd-%23326CE5.svg?style=for-the-badge&logo=etcd&logoColor=white"/>
       </td>
     </tr>
     <tr>
