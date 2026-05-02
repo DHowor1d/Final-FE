@@ -194,7 +194,7 @@
   </tr>
   <tr>
     <th>Position</th>
-    <td align="center"><b>Frontend</b></td>
+    <td align="center"><b>Frontend/Infra</b></td>
     <td align="center"><b>Frontend</b></td>
     <td align="center"><b>Backend</b></td>
     <td align="center"><b>Frontend</b></td>
